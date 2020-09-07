@@ -1,1 +1,1 @@
-# rapidsense_test
+# Unit tests for RapidSense and related perception components
