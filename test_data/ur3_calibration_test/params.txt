@@ -1,0 +1,3 @@
+robot: ur3
+flange: ur3/flange
+hub: h_3
