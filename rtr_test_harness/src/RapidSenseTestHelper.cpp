@@ -81,7 +81,8 @@ bool RapidSenseTestHelper::CreateAndSetupProject(const std::string& dc_group_nam
 
         rtr_msgs::UpdateProject srv1;
         srv1.request.project_name = P;
-        srv1.request.json_data = "{\"connection_type\": 1}";
+        nlohmann::json j({"connection_type", 1});
+        srv1.request.json_data = j.dump();
         if(!CallRosService<rtr_msgs::UpdateProject>(nh_, srv1, "/UpdateProject")){
             return false;
         }

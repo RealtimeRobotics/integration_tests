@@ -48,7 +48,7 @@ class CalibrationTestFixture : public ::testing::Test {
       nh_.param<std::string>("hub_name", hub_name, "h_3");
       nh_.param<std::string>("project", project, "../../");
 
-      project = ros::package::getPath(reg_test_calibration_sim) + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
+      project = ros::package::getPath("reg_test_calibration_sim") + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
       //"/home/krishna/workspaces/master/src/rapidsense_test/reg_test/reg_test_calibration_sim/../../test_data/ur3_calibration_test/ur3-obstacle.zip"; //ros::package::getPath("reg_test_calibration_sim") +
       RTR_INFO("Value of project={}", project);
       
@@ -76,7 +76,11 @@ public:
 TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) { 
   
   EXPECT_EQ(proxy.GetHealth().input_mode, RapidSenseInputMode::SIMULATION);
-  EXPECT_EQ(proxy.GetState(), RapidSenseState::CONFIGURE);
+  if (proxy.GetState() != RapidSenseState::CONFIGURE) {
+    EXPECT_TRUE(proxy.SetConfigureMode());
+  }
+  EXPECT_EQ(RapidSenseState(proxy.GetState()), RapidSenseState::CONFIGURE);
+
   // Configure the Robot for Calibration
   // Set Active Observer (arg)
   std::string active_observer = robot_name;
