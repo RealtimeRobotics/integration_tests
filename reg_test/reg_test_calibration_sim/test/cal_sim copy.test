@@ -1,0 +1,27 @@
+<launch>
+
+  <node
+      pkg="rtr_appliance_app"
+      name="rtr_appliance_app"
+      type="rtr_appliance_app"
+      cwd="node">
+      <env name="RTR_APPLIANCE_APP_RUNTIME_DIR" value="appliance_runtime" />
+      <env name="RTR_APPLIANCE_APP_STATE_DIR" value="appliance_runtime" />
+      <env name="RTR_APPLIANCE_APP_CACHE_DIR" value="appliance_runtime" />
+      <env name="RTR_APPLIANCE_APP_CONF_LOGS_DIR" value="appliance_runtime" />
+      <env name="RTR_APPLIANCE_APP_CONFIG_DIR" value="appliance_runtime" />
+  </node>
+
+  <node pkg="rtr_spatial_perception" name="rtr_spatial_perception" type="rtr_spatial_perception" cwd="node">
+        <param name="rapidsense_log_topic"  type="string" value="/appliance_log"/>
+  </node>
+
+  <node pkg="rtr_spatial_perception" name="rapidsense_sim_node" type="rapidsense_sim_node" />
+
+  <test test-name="CalibrationSimTest" pkg="reg_test_calibration_sim" type="CalibrationSimTest" >
+    <param name="project" type="string" value="../../test_data/ur3_calibration_test/ur3-obstacle.zip" />
+    <param name="robot_name"  type="string" value="ur3"/>
+    <param name="flange_frame"  type="string" value="flange"/>
+    <param name="hub_name"  type="string" value="h_3"/>
+  </test>
+</launch>
