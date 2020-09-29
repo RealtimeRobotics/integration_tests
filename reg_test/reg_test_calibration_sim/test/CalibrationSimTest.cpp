@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
   server.SetUp("appliance_dir", "~/.rapidsense");
 
   RUN_ALL_TESTS();
-  ros::waitForShutdown();
   server.Teardown();
 }
 
@@ -65,8 +64,9 @@ class CalibrationTestFixture : public ::testing::Test {
   }
     
 public:
-    CalibrationTestFixture() : nh_(""), appliance_(nh_), proxy(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {}
+    CalibrationTestFixture() : nh_(""), appliance_(nh_), proxy(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) { RTR_ERROR("CONSTRUCTION DEFAULT");}
     CalibrationTestFixture(ros::NodeHandle& nh) : nh_(nh), appliance_(nh_), proxy(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {
+      RTR_ERROR("CONSTRUCTION SUPPLIED");
       // Start our proxy as the Rapidsense gui so the server doesn't automatically try to transition
       // while we are testing
     }
@@ -74,12 +74,12 @@ public:
 
 
 TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) { 
+  proxy.RefreshAllRobots();
   
   EXPECT_EQ(proxy.GetHealth().input_mode, RapidSenseInputMode::SIMULATION);
   if (proxy.GetState() != RapidSenseState::CONFIGURE) {
     EXPECT_TRUE(proxy.SetConfigureMode());
   }
-  EXPECT_EQ(RapidSenseState(proxy.GetState()), RapidSenseState::CONFIGURE);
 
   // Configure the Robot for Calibration
   // Set Active Observer (arg)
@@ -123,8 +123,8 @@ TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
   
   EXPECT_TRUE(failed_uids.empty());
   EXPECT_TRUE(proxy.SetCalibrateMode());
-  EXPECT_TRUE(!proxy.CalibrateAllCameras());
-  EXPECT_TRUE(!proxy.SetConfigureMode());
+  EXPECT_TRUE(proxy.CalibrateAllCameras());
+  EXPECT_TRUE(proxy.SetConfigureMode());
   AllSensorData post_calibration_data = proxy.GetCalibration();
   EXPECT_TRUE(pre_calibration_data.FuzzyEquals(post_calibration_data, .025f));
   
