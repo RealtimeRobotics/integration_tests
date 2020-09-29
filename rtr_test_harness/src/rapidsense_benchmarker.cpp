@@ -1,6 +1,6 @@
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 
-#include "rtr_test_harness/BenchmarkManager.hpp"
+#include "rtr_perc_rapidsense_ros/bench/BenchmarkManager.hpp"
 #include "rtr_test_harness/RapidSenseTest.hpp"
 
 using namespace rtr;

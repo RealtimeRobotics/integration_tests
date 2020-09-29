@@ -24,13 +24,15 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("rapidsense_sim");
 
   ros::init(argc, argv, "CalibrationSimTest");
-  ::testing::InitGoogleTest(&argc, argv);
-
   RapidSenseTestHarnessServer server;
-  server.SetUp("appliance_dir", "~/.rapidsense");
+  std::string rs_path=ros::package::getPath("reg_test_calibration_sim") + "/../../test_data";
+  server.SetUp("appliance_test", rs_path);
 
+  ::testing::InitGoogleTest(&argc, argv);
   RUN_ALL_TESTS();
+  
   server.Teardown();
+  bfs::remove_all("appliance_test");
 }
 
 class CalibrationTestFixture : public ::testing::Test {
@@ -51,7 +53,7 @@ class CalibrationTestFixture : public ::testing::Test {
       //"/home/krishna/workspaces/master/src/rapidsense_test/reg_test/reg_test_calibration_sim/../../test_data/ur3_calibration_test/ur3-obstacle.zip"; //ros::package::getPath("reg_test_calibration_sim") +
       RTR_INFO("Value of project={}", project);
       
-      appliance_.CreateAndSetupProject("unit_test_decon_group", project);
+      appliance_.CreateAndSetupProject("ur3_calibration_test", project);
       std_srvs::Trigger trg;
       CallRosService<std_srvs::Trigger>(nh_, trg, "/restart_sim");
 

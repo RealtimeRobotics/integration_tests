@@ -106,9 +106,6 @@ set(INC
   inc/${PROJECT_NAME}/RapidSenseTestConfigs.hpp
   inc/${PROJECT_NAME}/RapidSenseTest.hpp
   inc/${PROJECT_NAME}/RapidSenseTestHelper.hpp
-  inc/${PROJECT_NAME}/BenchmarkManager.hpp
-  inc/${PROJECT_NAME}/GroundTruthRobot.hpp
-  inc/${PROJECT_NAME}/MetricPublisher.hpp
 )
 
 set(SRC
@@ -116,13 +113,18 @@ set(SRC
   src/RapidSenseTest.cpp
   src/RapidSenseTestHelper.cpp
   src/RapidSenseTestConfigs.cpp
-  src/BenchmarkManager.cpp
-  src/GroundTruthRobot.cpp
-  src/MetricPublisher.cpp
 )
 
 #set(RES resources/resources.qrc )
 #qt5_add_resources(RES_RCC ${RES})
+
+add_executable(run_rapidsense_tests src/run_rapidsense_tests.cpp ${INC} ${SRC})
+target_link_libraries(run_rapidsense_tests ${catkin_LIBRARIES} Threads::Threads)
+target_compile_options(run_rapidsense_tests PRIVATE ${RTR_COMPILE_OPTIONS})
+
+add_executable(rapidsense_benchmarker src/rapidsense_benchmarker.cpp ${INC} ${SRC})
+target_link_libraries(rapidsense_benchmarker ${catkin_LIBRARIES} Threads::Threads)
+target_compile_options(rapidsense_benchmarker PRIVATE ${RTR_COMPILE_OPTIONS})
 
 add_library(${PROJECT_NAME} ${INC} ${SRC})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
@@ -138,10 +140,6 @@ target_link_libraries(${PROJECT_NAME}
   Threads::Threads
 )
 target_compile_options(${PROJECT_NAME} PRIVATE ${RTR_COMPILE_OPTIONS})
-
-add_executable(run_rapidsense_tests src/run_rapidsense_tests.cpp ${INC} ${SRC})
-target_link_libraries(run_rapidsense_tests ${catkin_LIBRARIES} Threads::Threads)
-target_compile_options(run_rapidsense_tests PRIVATE ${RTR_COMPILE_OPTIONS})
 
 #############
 ## Install ##

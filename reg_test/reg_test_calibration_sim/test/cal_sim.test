@@ -1,9 +1,12 @@
 <launch>
-   <node pkg="rtr_appliance_app" name="rtr_appliance_app" type="rtr_appliance_app" cwd="node" >
-   </node>
+  <arg name="rp_dir" value="~/.ros/appliance_test" />
+  <node pkg="rtr_appliance_app" name="rtr_appliance_app" type="rtr_appliance_app" cwd="node"
+    args="--runtime-dir=$(arg rp_dir) --state-dir=$(arg rp_dir) --cache_dir=$(arg rp_dir) --config-dir=$(arg rp_dir) --logs-dir=$(arg rp_dir)/" >
+  </node>
 
-  <node pkg="rtr_spatial_perception" name="rtr_spatial_perception" type="rtr_spatial_perception" cwd="node">
-        <param name="rapidsense_log_topic"  type="string" value="/appliance_log"/>
+  <arg name="rs_dir" value="$(find reg_test_calibration_sim)/../../test_data/" />
+  <node pkg="rtr_spatial_perception" name="rtr_spatial_perception" type="rtr_spatial_perception" cwd="node"
+      args="--runtime-dir=$(arg rs_dir) --state-dir=$(arg rs_dir) --cache_dir=$(arg rs_dir) --config-dir=$(arg rs_dir) --logs-dir=$(arg rs_dir)/">
   </node>
 
   <test test-name="CalibrationSimTest" pkg="reg_test_calibration_sim" type="CalibrationSimTest" time-limit="600">

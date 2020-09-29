@@ -20,9 +20,14 @@ RapidSenseTestHarnessServer::RapidSenseTestHarnessServer() : nh_("~"), spinner_(
 
 }
 
-bool RapidSenseTestHarnessServer::SetUp(const std::string& , const std::string& ) {
+bool RapidSenseTestHarnessServer::SetUp(const std::string&app_dir , const std::string& ) {
 
   InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
+  const bfs::path appl_path = app_dir + "/appliance_data";
+  boost::system::error_code ec;
+  if (!bfs::exists(appl_path, ec) || ec != nullptr) {
+    bfs::create_directory(appl_path, ec);
+  }
 #if 0
   // Setup the Appliance application  
   auto factory = VoxelizerFactory::GetInstance();
