@@ -1,5 +1,5 @@
 <launch>
-  <arg name="rp_dir" value="~/.ros/appliance_test" />
+  <arg name="rp_dir" value="/tmp/appliance_test" />
   <node pkg="rtr_appliance_app" name="rtr_appliance_app" type="rtr_appliance_app" cwd="node"
     args="--runtime-dir=$(arg rp_dir) --state-dir=$(arg rp_dir) --cache_dir=$(arg rp_dir) --config-dir=$(arg rp_dir) --logs-dir=$(arg rp_dir)/" >
   </node>
