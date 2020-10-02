@@ -6,6 +6,7 @@
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
+#include <rtr_roadmapgen/roadmap_generator.hpp>
 
 using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 
@@ -421,8 +422,10 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr>& observers,
     }
 
     VoxelRegion region = project->GetVoxelRegion();
-    region_desc = VoxelRegionDescription({64, 64, 64},  // FIXME: don't hardcode
-                                         region.GetDimensions() / 2.0, region.GetPose().Inverse());
+    region_desc = VoxelRegionDescription(
+                          {DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION},
+                          region.GetDimensions() / 2.0,
+                          region.GetPose().Inverse());
 
     RapidSenseRobotConfig config;
     config.name = project_name;

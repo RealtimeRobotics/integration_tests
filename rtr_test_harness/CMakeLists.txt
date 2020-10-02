@@ -30,6 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
   rtr_perc_sensors_ros
   rtr_perc_sensors
   rtr_perc_spatial
+  rtr_roadmapgen
   sensor_msgs
   std_msgs
   tbb2
@@ -66,6 +67,7 @@ catkin_package(
     rtr_perc_sensors_ros
     rtr_perc_sensors
     rtr_perc_spatial
+    rtr_roadmapgen
     sensor_msgs
     std_msgs
     tbb2
