@@ -1,98 +1,44 @@
 #include "rtr_test_harness/RapidSenseTestHelper.hpp"
 
-#include <rtr_app_layer/RapidPlanProject.hpp>
-#include <rtr_appliance/Appliance.hpp>
-#include <rtr_control_ros/RosController.hpp>
-#include <rtr_msgs/ClearApplianceFaults.h>
-#include <rtr_msgs/DeconGroup.h>
-#include <rtr_msgs/DeleteProject.h>
-#include <rtr_msgs/EnterCalibrationMode.h>
-#include <rtr_msgs/ExitCalibrationMode.h>
-#include <rtr_msgs/GetAllResultCodes.h>
-#include <rtr_msgs/GetApplianceErrors.h>
-#include <rtr_msgs/GetApplianceState.h>
-#include <rtr_msgs/GetEULAAccepted.h>
-#include <rtr_msgs/GetGroupInfo.h>
-#include <rtr_msgs/GetHubConfig.h>
-#include <rtr_msgs/GetProjectList.h>
-#include <rtr_msgs/GetProjectROSInfo.h>
-#include <rtr_msgs/GetVisionEnabled.h>
-#include <rtr_msgs/GroupProject.h>
-#include <rtr_msgs/InstallProject.h>
-#include <rtr_msgs/LoadedProjectInfo.h>
-#include <rtr_msgs/SetEULAAccepted.h>
-#include <rtr_msgs/SetVisionEnabled.h>
-#include <rtr_msgs/UpdateGroup.h>
-#include <rtr_msgs/UpdateProject.h>
-#include <rtr_msgs/Version.h>
-#include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
-#include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
-#include <rtr_utils/Backtrace.hpp>
-#include <rtr_utils/Logging.hpp>
-#include <rtr_voxelize/VoxelizerFactory.hpp>
+#include <rtr_perc_rapidsense_ros/RapidSenseStatus.hpp>
+#include <rtr_perc_rapidsense_ros/SchemaMessageHelpers.hpp>
 
 #include "ros/ros.h"
 
 namespace rtr {
 namespace perception {
 
-RapidSenseTestHelper::RapidSenseTestHelper(ros::NodeHandle& nh) : nh_(nh) {
-  rtr_msgs::SetEULAAccepted srv;
-  srv.request.signature = "unittest";
-  CallRosService<rtr_msgs::SetEULAAccepted>(nh_, srv, "/SetEULAAccepted");
+RapidSenseTestHelper::RapidSenseTestHelper(ros::NodeHandle& nh)
+    : ApplianceTestHelper{nh} {}
+
+bool RapidSenseTestHelper::GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config) {
+
+  ros::ServiceClient get_config_client =
+      nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(RS::Topic("get_configuration"));
+  if (!ros::service::waitForService(get_config_client.getService(), ros::Duration(10.0))) {
+    //RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
+    return false;
+  }
+
+  rtr_perc_rapidsense_ros::GetSchemaMessage srv;
+  if (!get_config_client.call(srv)
+      || !FromSchemaMessageResponse(srv.response, config)) {
+    //RTR_ERROR("Failed to get configuration from RapidSenseServer");
+    return false;
+  }
+
+  return true;
 }
 
-bool RapidSenseTestHelper::CreateAndSetupProject(const std::string& dc_group_name,
-                                                 const std::string& project_zip) {
-  {
-    rtr_msgs::DeconGroup srv;
-    srv.request.group_name = dc_group_name;
-    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/CreateGroup")) {
-      return false;
-    }
-  }
-  {
-    rtr_msgs::InstallProject srv;
-    srv.request.zip_file_path = project_zip;
-    if (!CallRosService<rtr_msgs::InstallProject>(nh_, srv, "/InstallProject")) {
-      return false;
-    }
-  }
-  std::vector<std::string> projects;
-  {
-    rtr_msgs::GetProjectList srv;
-    if (!CallRosService<rtr_msgs::GetProjectList>(nh_, srv, "/GetProjectList")) {
-      return false;
-    }
-    projects = std::vector<std::string>(srv.response.projects);
-  }
-  for (const auto& P : projects) {
-    rtr_msgs::GroupProject srv;
-    srv.request.group_name = dc_group_name;
-    srv.request.project_name = P;
-    if (!CallRosService<rtr_msgs::GroupProject>(nh_, srv, "/AddProjectToGroup")) {
-      return false;
-    }
+bool RapidSenseTestHelper::CheckRapidSenseServerConfig(RapidSenseTestConfig& config) {
 
-    rtr_msgs::UpdateProject srv1;
-    srv1.request.project_name = P;
-    srv1.request.json_data = "{\"connection_type\":1}";
-    if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv1, "/UpdateProject")) {
-      return false;
-    }
+  SpatialPerceptionProjectSchema rapidsense_config_;
+  if(!this->GetRapidSenseServerConfig(rapidsense_config_)) {
+    return false;
   }
-  {
-    rtr_msgs::SetVisionEnabled srv;
-    srv.request.group_name = dc_group_name;
-    srv.request.enabled = true;
-    if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
-      return false;
-    }
-  }
-  {
-    rtr_msgs::DeconGroup srv;
-    srv.request.group_name = dc_group_name;
-    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/LoadGroup")) {
+
+  for (auto& stream : rapidsense_config_.streams) {
+    if (stream.enable_robotfilter != config.test_robot_filter) {
       return false;
     }
   }
@@ -100,5 +46,47 @@ bool RapidSenseTestHelper::CreateAndSetupProject(const std::string& dc_group_nam
   return true;
 }
 
-}  // namespace perception
-}  // namespace rtr
+bool RapidSenseTestHelper::SetRapidSenseServerConfig(RapidSenseTestConfig& config) {
+
+  SpatialPerceptionProjectSchema rapidsense_config_;
+  if(!this->GetRapidSenseServerConfig(rapidsense_config_)) {
+    return false;
+  }
+
+  for (auto& stream : rapidsense_config_.streams) {
+    if (stream.enable_robotfilter != config.test_robot_filter) {
+      stream.enable_robotfilter = config.test_robot_filter;
+    }
+  }
+
+  return true;
+}
+
+bool RapidSenseTestHelper::GetRapidSenseServerHealth(RapidSenseHealth& health) {
+
+  rtr_msgs::SchemaMessage::ConstPtr health_msg =
+      ros::topic::waitForMessage<rtr_msgs::SchemaMessage>(RS::Topic("health"), ros::Duration(10.0));
+  if (!health_msg) {
+    return false;
+  }
+
+  try {
+    health = FromSchemaMessage<RapidSenseHealth>(*health_msg);
+  } catch (std::exception& e) {
+    return false;
+  }
+
+  return true;
+}
+
+bool RapidSenseTestHelper::CheckRapidSenseServerState(RapidSenseState& state) {
+  RapidSenseHealth health_;
+  if(!this->GetRapidSenseServerHealth(health_)) {
+    return false;
+  }
+
+  return health_.current_status.state == state;
+}
+
+} // perception
+} // rtr

@@ -104,6 +104,7 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${boost_INCLUDE_DIR}   ${Qt5Co
 ${Qt5Gui_INCLUDE_DIRS})
 
 set(INC
+  inc/${PROJECT_NAME}/ApplianceTestHelper.hpp
   inc/${PROJECT_NAME}/RapidSenseTestHarnessServer.hpp
   inc/${PROJECT_NAME}/RapidSenseTestConfigs.hpp
   inc/${PROJECT_NAME}/RapidSenseTest.hpp
@@ -111,6 +112,7 @@ set(INC
 )
 
 set(SRC
+  src/ApplianceTestHelper.cpp
   src/RapidSenseTestHarnessServer.cpp
   src/RapidSenseTest.cpp
   src/RapidSenseTestHelper.cpp

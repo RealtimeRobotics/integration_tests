@@ -65,7 +65,12 @@ class CalibrationTestFixture : public ::testing::Test {
       RTR_ERROR("Unable to get state directory from rapidsense");
     }
 
-    appliance_.CreateAndSetupProject(decon_group_name, project);
+    //appliance_.CreateAndSetupProject(decon_group_name, project);
+    appliance_.InstallProject(project);
+    appliance_.SetAllProjectsToSimulated();
+    appliance_.AddAllProjectsToDeconGroup(decon_group_name);
+    appliance_.SetVisionenabled(decon_group_name, true);
+    appliance_.LoadGroup(decon_group_name);
 
     std::string rapidsense_data_directory =
         fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
