@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 
 //#include <rtr_perc_sensors/SensorCalibrationData.hpp>
-//#include <rtr_utils/Logging.hpp>
+#include <rtr_utils/Logging.hpp>
 
 //#include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 //#include <rtr_appliance/Appliance.hpp>
@@ -24,19 +24,19 @@ template<typename MessageType> bool CallRosService(ros::NodeHandle& nh,
   // TODO: We need a timeout on watiForService, but uncertain of how this
   // can be done without hardcoding
   if(!ros::service::waitForService(serv)){
-    //RTR_ERROR("No service {}", serv);
+    RTR_ERROR("No service {}", serv);
     return false;
   }
 
-  //RTR_DEBUG("Calling service {} with {}", serv, srv.request);
+  RTR_DEBUG("Calling service {} with {}", serv, srv.request);
   ros::ServiceClient client = nh.serviceClient<MessageType>(serv);
   if (client.call(srv)) {
-    //RTR_DEBUG("Success with {}", srv.response);
+    RTR_DEBUG("Success with {}", srv.response);
     return true;
   }
   else
   {
-    //RTR_ERROR("Failed to call {}", serv);
+    RTR_ERROR("Failed to call {}", serv);
   }
   return false;
 }

@@ -5,7 +5,6 @@
 //#include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
 //#include <rtr_appliance/Appliance.hpp>
 //#include <rtr_utils/Backtrace.hpp>
-//#include <rtr_utils/Logging.hpp>
 
 #include <nlohmann-json/json.hpp>
 
@@ -127,8 +126,9 @@ bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
 }
 
 
-// rtr_appliance will overwrite all robot_params with what is provided to the UpdateProject service.
-// Thus the current robot param will need to be retrieved, modified and then sent back to the appliance
+// rtr_appliance will overwrite all robot_params with what is provided to the
+// UpdateProject service. Thus the current robot param will need to be retrieved,
+// modified and then sent back to the appliance
 template<typename ParamType> bool ApplianceTestHelper::SetProjectRobotParam(
                                                 const std::string& prj_name,
                                                 const std::string& param_k,
@@ -171,11 +171,13 @@ bool ApplianceTestHelper::SetAllProjectsToSimulated() {
 
   // Set Connection Type to simulated (1)
   for (auto& p : projects) {
+
     int conn_type = 1;
     if(!this->SetProjectRobotParam(p, "connection_type", conn_type)) {
-      //RTR_ERROR("Couldn't set project parameter");
+      RTR_ERROR("Couldn't set project parameter");
       return false;
     }
+
   }
   return true;
 }
