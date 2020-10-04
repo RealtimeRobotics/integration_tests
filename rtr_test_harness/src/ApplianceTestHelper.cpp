@@ -52,7 +52,7 @@ bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
   return true;
 }
 
-bool GetInstalledProjects(std::vector<std::string>& projects) {
+bool ApplianceTestHelper::GetInstalledProjects(std::vector<std::string>& projects) {
 
   rtr_msgs::GetProjectList msg_prjs;
   if(!CallRosService<rtr_msgs::GetProjectList>(nh_, msg_prjs, "/GetProjectList")) {
@@ -161,7 +161,7 @@ template<typename ParamType> bool ApplianceTestHelper::SetProjectRobotParam(
   return true;
 }
 
-bool SetAllProjectsToSimulated() {
+bool ApplianceTestHelper::SetAllProjectsToSimulated() {
 
   // Get all list of all projects that are installed
   std::vector<std::string> projects;
@@ -171,10 +171,13 @@ bool SetAllProjectsToSimulated() {
 
   // Set Connection Type to simulated (1)
   for (auto& p : projects) {
-    if(!this->SetProjectRobotParam(p, "connection_type", 1)) {
+    int conn_type = 1;
+    if(!this->SetProjectRobotParam(p, "connection_type", conn_type)) {
+      //RTR_ERROR("Couldn't set project parameter");
       return false;
     }
   }
+  return true;
 }
 
 bool ApplianceTestHelper::GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group) {
