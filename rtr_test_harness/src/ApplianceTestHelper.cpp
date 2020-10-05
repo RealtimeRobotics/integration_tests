@@ -147,7 +147,7 @@ template<typename ParamType> bool ApplianceTestHelper::SetProjectRobotParam(
 
   // if key does not exist, return
   if (j.find(param_k) == j.end()) {
-    return false;
+    RTR_WARN("Key does not exist in robot_params");
   }
   j["string_params"][param_k] = param_v;
   // Update Project Info
