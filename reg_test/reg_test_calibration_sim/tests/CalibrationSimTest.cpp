@@ -34,6 +34,8 @@ int main(int argc, char** argv) {
   RUN_ALL_TESTS();
 
   server.Teardown();
+  // TODO Do not hard code. The appliance/rapidsense may end up using different
+  // directories during runtime.
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
 }
@@ -43,7 +45,7 @@ class CalibrationTestFixture : public ::testing::Test {
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
-  std::string decon_group_name, robot_name, flange_frame, hub_name, project, 
+  std::string decon_group_name, robot_name, flange_frame, hub_name, project,
               rapidsense_data, robot_param;
 
   void SetUp() override {
@@ -58,7 +60,7 @@ class CalibrationTestFixture : public ::testing::Test {
               + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
     rapidsense_data = ros::package::getPath("reg_test_calibration_sim")
                       + "/../../test_data/ur3_calibration_test/rapidsense_data/";
-    robot_param = ros::package::getPath("reg_test_calibration_sim") 
+    robot_param = ros::package::getPath("reg_test_calibration_sim")
                   + "/../../test_data/ur3_calibration_test/ur3.json";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
@@ -85,7 +87,18 @@ class CalibrationTestFixture : public ::testing::Test {
     std::this_thread::sleep_for(std::chrono::seconds(4));
   }
 
-  void TearDown() override {}
+  void TearDown() override {
+    std::string rapidsense_state_directory;
+    if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
+      RTR_ERROR("Unable to get state directory from rapidsense");
+    }
+
+    // If the proxy cannot get the state directory, that means it rapidsense
+    // will use the default path in /var/lib/rtr_spatial_perception. That
+    // will still need to be removed for proper teardown
+    std::string rapidsense_data_directory = fmt::format("{}/{}/",rapidsense_state_directory, decon_group_name);
+    bfs::remove_all(rapidsense_data_directory);
+  }
 
  public:
   CalibrationTestFixture()
