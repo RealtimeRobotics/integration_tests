@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "rtr_test_harness/ApplianceTestHelper.hpp"
 //#include <rtr_app_layer/RapidPlanProject.hpp>
 //#include <rtr_control_ros/RosController.hpp>
@@ -125,31 +127,14 @@ bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
   return true;
 }
 
+// Take a json file and set a project's robot_params to the specified json file
+bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
+                                               const std::string& param_json_path) {
 
-// rtr_appliance will overwrite all robot_params with what is provided to the
-// UpdateProject service. Thus the current robot param will need to be retrieved,
-// modified and then sent back to the appliance
-template<typename ParamType> bool ApplianceTestHelper::SetProjectRobotParam(
-                                                const std::string& prj_name,
-                                                const std::string& param_k,
-                                                ParamType param_v) {
-  // Get project info
-  rtr_msgs::GetProjectROSInfo prj_info;
-  prj_info.request.project_name = prj_name;
-  if(!CallRosService<rtr_msgs::GetProjectROSInfo>(nh_, prj_info, "/GetProjectROSInfo")
-      || !prj_info.response.valid) {
-    return false;
-  }
-  std::string robot_params = prj_info.response.robot_params;
+  // take the robot_param json file and create a json obj
+  std::ifstream ifs(param_json_path);
+  nlohmann::json j = nlohmann::json::parse(ifs);
 
-  // Modify retrieved robot_params
-  nlohmann::json j = nlohmann::json::parse(robot_params);
-
-  // if key does not exist, return
-  if (j.find(param_k) == j.end()) {
-    RTR_WARN("Key does not exist in robot_params");
-  }
-  j["string_params"][param_k] = param_v;
   // Update Project Info
   rtr_msgs::UpdateProject srv;
   srv.request.project_name = prj_name;
@@ -157,27 +142,6 @@ template<typename ParamType> bool ApplianceTestHelper::SetProjectRobotParam(
   if(!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject")
       || srv.response.result_code != 0) {
     return false;
-  }
-  return true;
-}
-
-bool ApplianceTestHelper::SetAllProjectsToSimulated() {
-
-  // Get all list of all projects that are installed
-  std::vector<std::string> projects;
-  if(!this->GetInstalledProjects(projects)) {
-    return false;
-  }
-
-  // Set Connection Type to simulated (1)
-  for (auto& p : projects) {
-
-    int conn_type = 1;
-    if(!this->SetProjectRobotParam(p, "connection_type", conn_type)) {
-      RTR_ERROR("Couldn't set project parameter");
-      return false;
-    }
-
   }
   return true;
 }

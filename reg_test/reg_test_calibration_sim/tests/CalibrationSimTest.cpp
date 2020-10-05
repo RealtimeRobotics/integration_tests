@@ -43,7 +43,8 @@ class CalibrationTestFixture : public ::testing::Test {
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
-  std::string decon_group_name, robot_name, flange_frame, hub_name, project, rapidsense_data;
+  std::string decon_group_name, robot_name, flange_frame, hub_name, project, 
+              rapidsense_data, robot_param;
 
   void SetUp() override {
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
@@ -57,6 +58,8 @@ class CalibrationTestFixture : public ::testing::Test {
               + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
     rapidsense_data = ros::package::getPath("reg_test_calibration_sim")
                       + "/../../test_data/ur3_calibration_test/rapidsense_data/";
+    robot_param = ros::package::getPath("reg_test_calibration_sim") 
+                  + "/../../test_data/ur3_calibration_test/ur3.json";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
@@ -65,12 +68,11 @@ class CalibrationTestFixture : public ::testing::Test {
       RTR_ERROR("Unable to get state directory from rapidsense");
     }
 
-    //appliance_.CreateAndSetupProject(decon_group_name, project);
-    appliance_.InstallProject(project);
-    appliance_.SetAllProjectsToSimulated();
-    appliance_.AddAllProjectsToDeconGroup(decon_group_name);
-    appliance_.SetVisionenabled(decon_group_name, true);
-    appliance_.LoadGroup(decon_group_name);
+    ASSERT_TRUE(appliance_.InstallProject(project));
+    ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
+    ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
+    ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
 
     std::string rapidsense_data_directory =
         fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);

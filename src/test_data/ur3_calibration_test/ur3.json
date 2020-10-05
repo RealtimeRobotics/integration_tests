@@ -1,0 +1,24 @@
+{
+   "bool_params":{
+      "using_urcap":false
+   },
+   "double_params":{
+      
+   },
+   "float_params":{
+      "max_tool_speed":5.0
+   },
+   "int_params":{
+      "urcap_float_register":0
+   },
+   "string_params":{
+      "connection_type": 1,
+      "robot_address":"127.0.0.1",
+      "sim_ip_address":"127.0.0.1"
+   },
+   "uint_params":{
+      "shortcut_type":0,
+      "sim_command_port":30003,
+      "sim_data_port":30004
+   }
+}

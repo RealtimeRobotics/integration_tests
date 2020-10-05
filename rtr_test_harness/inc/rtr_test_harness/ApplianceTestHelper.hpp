@@ -57,12 +57,8 @@ public:
 
   bool UnloadGroup(const std::string& dc_group_name);
 
-  template<typename ParamType> bool SetProjectRobotParam(
-                                        const std::string& prj_name,
-                                        const std::string& param_k,
-                                        ParamType param_v);
-
-  bool SetAllProjectsToSimulated();
+  bool SetProjectRobotParam(const std::string& prj_name,
+                            const std::string& param_json_path);
 
   bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group);
 
