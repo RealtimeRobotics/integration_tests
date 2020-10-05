@@ -1,5 +1,6 @@
 #include "rtr_test_harness/RapidSenseTestHelper.hpp"
 
+#include <rtr_utils/Logging.hpp>
 #include <rtr_perc_rapidsense_ros/RapidSenseStatus.hpp>
 #include <rtr_perc_rapidsense_ros/SchemaMessageHelpers.hpp>
 
@@ -16,14 +17,14 @@ bool RapidSenseTestHelper::GetRapidSenseServerConfig(SpatialPerceptionProjectSch
   ros::ServiceClient get_config_client =
       nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(RS::Topic("get_configuration"));
   if (!ros::service::waitForService(get_config_client.getService(), ros::Duration(10.0))) {
-    //RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
+    RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
     return false;
   }
 
   rtr_perc_rapidsense_ros::GetSchemaMessage srv;
   if (!get_config_client.call(srv)
       || !FromSchemaMessageResponse(srv.response, config)) {
-    //RTR_ERROR("Failed to get configuration from RapidSenseServer");
+    RTR_ERROR("Failed to get configuration from RapidSenseServer");
     return false;
   }
 
@@ -67,12 +68,14 @@ bool RapidSenseTestHelper::GetRapidSenseServerHealth(RapidSenseHealth& health) {
   rtr_msgs::SchemaMessage::ConstPtr health_msg =
       ros::topic::waitForMessage<rtr_msgs::SchemaMessage>(RS::Topic("health"), ros::Duration(10.0));
   if (!health_msg) {
+    RTR_ERROR("Timed out waiting for health state from RapidSenseServer");
     return false;
   }
 
   try {
     health = FromSchemaMessage<RapidSenseHealth>(*health_msg);
   } catch (std::exception& e) {
+    RTR_ERROR("Cannot parse RapidSenseHealth from schema message: [{}]", health_msg->data);
     return false;
   }
 

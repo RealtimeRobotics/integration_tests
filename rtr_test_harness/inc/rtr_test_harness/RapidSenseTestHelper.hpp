@@ -17,14 +17,19 @@ class RapidSenseTestHelper : public ApplianceTestHelper {
 public:
   RapidSenseTestHelper(ros::NodeHandle& nh);
 
+  // @brief Get rapidsense server config via ros
   bool GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config);
 
+  // @brief Check rapidsense server config matches
   bool CheckRapidSenseServerConfig(RapidSenseTestConfig& config);
 
+  // @brief Set rapidsense server to passed config
   bool SetRapidSenseServerConfig(RapidSenseTestConfig& config);
 
+  // @brief Get health state from rapidsense server via ros
   bool GetRapidSenseServerHealth(RapidSenseHealth& health);
 
+  // @brief Check rapidsense server health state matches
   bool CheckRapidSenseServerState(RapidSenseState& state);
 
 };

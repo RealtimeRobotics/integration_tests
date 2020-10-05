@@ -127,10 +127,8 @@ bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
   return true;
 }
 
-// Take a json file and set a project's robot_params to the specified json file
 bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
                                                const std::string& param_json_path) {
-
   // take the robot_param json file and create a json obj
   std::ifstream ifs(param_json_path);
   nlohmann::json j = nlohmann::json::parse(ifs);
@@ -143,6 +141,7 @@ bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
       || srv.response.result_code != 0) {
     return false;
   }
+
   return true;
 }
 
@@ -159,6 +158,7 @@ bool ApplianceTestHelper::GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_g
       return true;
     }
   }
+
   return false;
 }
 
