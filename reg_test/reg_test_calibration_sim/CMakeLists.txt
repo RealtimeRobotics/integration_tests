@@ -63,6 +63,7 @@ generate_messages(
 ###################################
 
 catkin_package(
+  INCLUDE_DIRS inc
   CATKIN_DEPENDS
     rospy
     rtr_core
@@ -100,6 +101,8 @@ set(PROJECT_VERSION ${${PROJECT_NAME}_VERSION})
 # autoconf-style config header; because config- and build-time cmake variables
 # are nice to have as preprocessor definitions
 configure_file(config.h.in config.h @ONLY)
+
+include_directories(inc ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(SYSTEM
   ${catkin_INCLUDE_DIRS}
