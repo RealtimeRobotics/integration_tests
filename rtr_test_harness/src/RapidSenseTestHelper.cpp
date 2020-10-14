@@ -4,7 +4,7 @@
 #include <rtr_perc_rapidsense_ros/RapidSenseStatus.hpp>
 #include <rtr_perc_rapidsense_ros/SchemaMessageHelpers.hpp>
 
-#include "ros/ros.h"
+#include <ros/package.h>
 
 namespace rtr {
 namespace perception {
