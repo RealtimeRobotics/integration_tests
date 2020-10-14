@@ -32,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   rtr_control_ros
   rtr_msgs
   rtr_ros_utils
+  rtr_test_cmake_defs
 )
 
 # https://github.com/ros/cmake_modules
@@ -114,12 +115,5 @@ include_directories(SYSTEM
 #############
 ## Testing ##
 #############
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(CalibrationSimTest test/cal_sim.test test/CalibrationSimTest.cpp)
-  target_link_libraries(CalibrationSimTest ${catkin_LIBRARIES})
-  set_property(TARGET CalibrationSimTest PROPERTY POSITION_INDEPENDENT_CODE ON)
-  target_compile_options(CalibrationSimTest PRIVATE ${GTEST_COMPILE_OPTIONS})
-endif()
 
-
+rs_add_rostest(CalibrationSimTest)

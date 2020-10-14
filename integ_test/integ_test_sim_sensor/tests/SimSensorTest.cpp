@@ -15,8 +15,8 @@
 using namespace rtr;
 using namespace rtr::perception;
 
-// need high reprojection tolerance, since rendered version of checkerboard 
-// cannot achieve subpixel accuracy 
+// need high reprojection tolerance, since rendered version of checkerboard
+// cannot achieve subpixel accuracy
 const float REPROJ_TOLERANCE = 3.0;
 const std::string FLANGE_FRAME = "rtr_flange";
 const std::string FIDUCIAL_MESH = "rtr_fiducial_sim";
@@ -111,7 +111,6 @@ void TestDepthAccuracy(const std::string& uid, const std::string& model_name,
 bool DetectFiducial(const RobotObserver::Ptr observer, const JointConfiguration& config,
                     const SimSensor::Ptr sensor, const SensorFrameType& ft,
                     const CalibrationTarget& target, std::vector<cv::Point2f>& corners) {
-
   observer->SetCurrentJointConfiguration(config);
   SensorFrame::ConstPtr rendered_frame = testutils::GetRenderedImageFromSimSensor(sensor, ft);
   SensorFrameImage::ConstPtr image_frame = SensorFrameImage::CastConstPtr(rendered_frame);
@@ -122,9 +121,9 @@ bool DetectFiducial(const RobotObserver::Ptr observer, const JointConfiguration&
 
 // Check that the fiducial pose detected by the simulated sensor matches the expected fiducial
 // pose from the robot link transforms
-float ComputeReprojError(const RobotObserver::Ptr observer, const SimSensor::Ptr sensor, 
-                       const SensorFrameType& ft,
-                       const CalibrationTarget& target, const std::vector<cv::Point2f>& corners) {
+float ComputeReprojError(const RobotObserver::Ptr observer, const SimSensor::Ptr sensor,
+                         const SensorFrameType& ft, const CalibrationTarget& target,
+                         const std::vector<cv::Point2f>& corners) {
   RobotObserver::LinkPoseMap pose_map = observer->GetLinkPoses();
   const std::map<SensorFrameType, SensorIntrinsics::ConstPtr> intr_map = sensor->getIntrinsics();
   const std::map<SensorFrameType, SensorExtrinsics::ConstPtr> extr_map = sensor->getExtrinsics();
@@ -189,7 +188,6 @@ TEST(SimSensor, SetCalibration) {
   }
 }
 
-
 //// Test depth accuracy of rendered UR10 robot
 TEST(SimSensor, UR10DepthAccuracy) {
   const std::string uid = "INTEL_REALSENSE_D435_000000000000";
@@ -243,14 +241,14 @@ TEST(SimSensor, SensorModelDepthDifference) {
 
 //// Test that the sim sensor can render the fiducial correctly
 TEST(SimSensor, FiducialDetection) {
-
   const std::string uid = "INTEL_REALSENSE_D435_000000000000";
   const SensorFrameType ft(SensorFrameType::SENSOR_FRAME_IMAGE_IR_STEREO_1,
                            SensorFrameType::RECTIFIED);
 
   const Eigen::Quaterniond q = Eigen::Quaterniond(0.0, 1.0, 0.0, 0.0);
   const Eigen::Vector3d xyz = Eigen::Vector3d(0.0, 0.0, 2.5);
-  SensorExtrinsics::ConstPtr extr = SensorExtrinsics::MakePtr(SensorMetadata(uid, ft), q, xyz, "world");
+  SensorExtrinsics::ConstPtr extr =
+      SensorExtrinsics::MakePtr(SensorMetadata(uid, ft), q, xyz, "world");
 
   // set up sim sensor
   SimSensor::Ptr sensor = testutils::CreateSimSensor(uid, FLANGE_FRAME, q, xyz);
@@ -265,16 +263,16 @@ TEST(SimSensor, FiducialDetection) {
   ASSERT_TRUE(testutils::CreateMeshMap(observer, mesh_map));
   sensor->AddRobot(observer, mesh_map);
 
-  // load fiducial mesh and add to sim sensor 
+  // load fiducial mesh and add to sim sensor
   std::vector<TriMesh::Ptr> fiducial_meshes;
   std::vector<Vec4> fiducial_colors;
   ASSERT_TRUE(LoadMesh("data/fiducial_plate.dae", fiducial_meshes, fiducial_colors));
   sensor->AddMesh(FIDUCIAL_MESH, fiducial_meshes);
   sensor->AddColor(FIDUCIAL_MESH, fiducial_colors);
- 
+
   // test detection and correct pose computation
   const CalibrationTarget target;
-  std::vector<cv::Point2f> corners; 
+  std::vector<cv::Point2f> corners;
   JointConfiguration config({0.f, -1.57f, 0.f, 0.f, 1.57f, 0.f});
   EXPECT_TRUE(DetectFiducial(observer, config, sensor, ft, target, corners));
   EXPECT_LT(ComputeReprojError(observer, sensor, ft, target, corners), REPROJ_TOLERANCE);

@@ -1,0 +1,2 @@
+# Append cmake modules from source directory to the cmake module path
+include("${rtr_test_cmake_defs_DIR}/../../../@CATKIN_PACKAGE_SHARE_DESTINATION@/cmake/functions/test_functions.cmake")

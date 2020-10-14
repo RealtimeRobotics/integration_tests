@@ -1,0 +1,2 @@
+# Append cmake modules from source directory to the cmake module path
+include("@CMAKE_CURRENT_SOURCE_DIR@/cmake/functions/test_functions.cmake")

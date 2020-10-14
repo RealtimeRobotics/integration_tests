@@ -1,27 +1,24 @@
 #include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
 
 #include <rtr_app_layer/RapidPlanProject.hpp>
+#include <rtr_appliance/Appliance.hpp>
 #include <rtr_control_ros/RosController.hpp>
 #include <rtr_msgs/GetGroupInfo.h>
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
-#include <rtr_appliance/Appliance.hpp>
 #include <rtr_utils/Backtrace.hpp>
 #include <rtr_utils/Logging.hpp>
 #include <rtr_voxelize/VoxelizerFactory.hpp>
 
-//using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
+// using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 
 namespace rtr {
 namespace perception {
 
-RapidSenseTestHarnessServer::RapidSenseTestHarnessServer() : nh_("~"), spinner_(10) {
+RapidSenseTestHarnessServer::RapidSenseTestHarnessServer() : nh_("~"), spinner_(10) {}
 
-}
-
-bool RapidSenseTestHarnessServer::SetUp(const std::string&app_dir , const std::string& ) {
-
+bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::string&) {
   InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
   const bfs::path appl_path = app_dir + "/appliance_data";
   boost::system::error_code ec;
@@ -65,16 +62,15 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string&app_dir , const std::s
 
   simulator_ = SensorSimulator::MakePtr(nh_);
   boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
-      [this](std_srvs::Trigger::Request&,
-             std_srvs::Trigger::Response& res) -> bool {
-    //this->simulator_->Shutdown();
+      [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
+    // this->simulator_->Shutdown();
     res.success = this->simulator_->Init(true);
     return true;
   };
   restart_sim_ = nh_.advertiseService("/restart_sim", callback);
 
   return true;
- }
+}
 
 #if 0
   bool RapidSenseTestHarnessServer::SetupDeconflictionGroup(const std::string& project, const std::string& DC_group) {
@@ -100,13 +96,13 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string&app_dir , const std::s
     }
     return true;
   }
-  #endif
+#endif
 
-  void RapidSenseTestHarnessServer::Teardown() {
-      //appliance_.reset();
-      //rapidsense_->Shutdown();
-      simulator_->Shutdown();
-  }
+void RapidSenseTestHarnessServer::Teardown() {
+  // appliance_.reset();
+  // rapidsense_->Shutdown();
+  simulator_->Shutdown();
+}
 
-}
-}
+}  // namespace perception
+}  // namespace rtr
