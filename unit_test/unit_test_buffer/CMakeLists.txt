@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(integ_test_buffer)
+project(unit_test_buffer)
 
 set(CMAKE_CXX_STANDARD 14)
 # dpkg assumes multiarch and cmake supports it:

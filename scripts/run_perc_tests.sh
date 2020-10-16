@@ -31,7 +31,7 @@ while getopts ":hd:" opt; do
 done
 shift "$((${OPTIND} - 1))"
 
-readonly packages="$(catkin list | grep 'integ_test\|reg_test' | sed 's/- / /g' | tr -d '\n')"
+readonly packages="$(catkin list | grep 'unit_test\|integ_test\|reg_test' | sed 's/- / /g' | tr -d '\n')"
 echo "Running tests from the following packages: ${packages}"
 
 if [ "${disable_flakes}" -eq 1 ]; then
