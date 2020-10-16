@@ -117,3 +117,4 @@ include_directories(SYSTEM
 #############
 
 rs_add_rostest(CalibrationSimTest)
+rs_add_rostest(RecordPlaybackSimTest record_playback)
