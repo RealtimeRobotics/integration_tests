@@ -60,6 +60,7 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::s
   }
 #endif
 
+  // Initialize simulator and advertise service to restart
   simulator_ = SensorSimulator::MakePtr(nh_);
   boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
       [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
