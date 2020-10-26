@@ -12,7 +12,7 @@ using namespace std;
 struct Temp {
   Temp() : time(std::chrono::high_resolution_clock::now()), index(0) {}
   Temp(const int idx) : time(std::chrono::high_resolution_clock::now()), index(idx) {}
-  Temp(const int idx, const SensorTime timestamp) : index(idx), time(timestamp) {}
+  Temp(const int idx, const SensorTime timestamp) : time(timestamp), index(idx) {}
 
   SensorTime time;
   int index;
@@ -21,7 +21,7 @@ struct Temp {
 void EmptyBufferCheck(BufferInterface<Temp>& buffer) {
   buffer.Clear();
   Temp t;
-  EXPECT_EQ(buffer.size(), 0);
+  EXPECT_EQ(buffer.size(), 0u);
   EXPECT_FALSE(buffer.front(t));
   EXPECT_TRUE(buffer.empty());
   EXPECT_FALSE(buffer.get(t));
@@ -62,7 +62,7 @@ void BufferAddRemoveElementCheck(BufferInterface<Temp>& buffer) {
   buffer.Clear();
   Temp t;
   buffer.add(Temp(-2));
-  EXPECT_EQ(buffer.size(), 1);
+  EXPECT_EQ(buffer.size(), 1u);
   EXPECT_TRUE(buffer.front(t));
   EXPECT_EQ(t.index, -2);
   t.index = 0;
@@ -74,7 +74,7 @@ void BufferAddDataCheck(BufferInterface<Temp>& buffer, const std::vector<Temp>& 
                         const int& size_after_add) {
   AddData(buffer, add_data, 0);
   EXPECT_FALSE(buffer.empty());
-  EXPECT_EQ(buffer.size(), size_after_add);
+  EXPECT_EQ(buffer.size(), size_t(size_after_add));
 }
 
 void BufferRemoveArrayCheck(BufferInterface<Temp>& buffer, const std::vector<Temp>& removed_data_gt,
@@ -82,13 +82,13 @@ void BufferRemoveArrayCheck(BufferInterface<Temp>& buffer, const std::vector<Tem
   std::vector<Temp> removed_data;
   int num_remove = removed_data_gt.size();
   RemoveData(buffer, num_remove, removed_data, 0);
-  EXPECT_EQ(num_remove, removed_data.size());
+  EXPECT_EQ(size_t(num_remove), removed_data.size());
 
   // check with ground truth
   for (int i = 0; i < num_remove; i++) {
     EXPECT_EQ(removed_data[i].index, removed_data_gt[i].index);
   }
-  EXPECT_EQ(buffer.size(), size_after_remove);
+  EXPECT_EQ(buffer.size(), size_t(size_after_remove));
 }
 
 void FIFOBufferCheck(BufferInterface<Temp>& buffer) {
@@ -142,21 +142,21 @@ void AgingBufferCheck(BufferInterface<Temp>& buffer) {
 
   Temp t;
   EXPECT_TRUE(buffer.get(t));
-  EXPECT_EQ(buffer.size(), 9);
+  EXPECT_EQ(buffer.size(), 9u);
   EXPECT_EQ(t.index, 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
   EXPECT_TRUE(buffer.get(t));
-  EXPECT_EQ(buffer.size(), 6);
+  EXPECT_EQ(buffer.size(), 6u);
   EXPECT_EQ(t.index, 4);
-  EXPECT_EQ(buffer.numErased(), num_erased + 2);
+  EXPECT_EQ(buffer.numErased(), size_t(num_erased + 2));
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   EXPECT_TRUE(buffer.empty());
-  EXPECT_EQ(buffer.size(), 0);
-  EXPECT_EQ(buffer.numErased(), num_erased + 8);
+  EXPECT_EQ(buffer.size(), 0u);
+  EXPECT_EQ(buffer.numErased(), size_t(num_erased + 8));
 }
 
 /*******************************************************************************
@@ -176,7 +176,7 @@ TEST(BufferTest, BufferQueueT) {
   FIFOBufferCheck(buffer);
   BufferWaitForCheck(buffer);
   // default value
-  EXPECT_EQ(buffer.numErased(), 0);
+  EXPECT_EQ(buffer.numErased(), 0u);
   RTR_INFO("Ending BufferQueueT test");
 }
 
@@ -222,7 +222,7 @@ TEST(BufferTest, BufferQueueTMultiThreaded) {
   EXPECT_FALSE(buffer.empty());
   EXPECT_NE(add1, 1000);
   EXPECT_NE(add2, 1000);
-  EXPECT_EQ(buffer.size(), 1000);
+  EXPECT_EQ(buffer.size(), 1000u);
 
   RemoveData(buffer, 1000, data_removed, 0);
 
@@ -260,7 +260,7 @@ TEST(BufferTest, BufferLastT) {
   BufferRemoveArrayCheck(buffer, {Temp(99)}, 0);
   BufferWaitForCheck(buffer);
   // default value
-  EXPECT_EQ(buffer.numErased(), 0);
+  EXPECT_EQ(buffer.numErased(), 0u);
   RTR_INFO("Ending BufferLastT test");
 }
 
@@ -290,7 +290,7 @@ TEST(BufferTest, BufferLastTMultithreaded) {
     q3.join();
   }
 
-  EXPECT_EQ(data_removed.size(), 1);
+  EXPECT_EQ(data_removed.size(), 1u);
   int val = data_removed[0].index;
   if (!(val >= 1000 && val < 2000) && !(val >= 3000 && val < 4000)) {
     FAIL() << "Buffer has invalid values, that should not have been there.";
@@ -298,10 +298,10 @@ TEST(BufferTest, BufferLastTMultithreaded) {
 
   Temp t;
   EXPECT_FALSE(buffer.empty());
-  EXPECT_EQ(buffer.size(), 1);
+  EXPECT_EQ(buffer.size(), 1u);
   EXPECT_TRUE(buffer.get(t));
   EXPECT_TRUE(t.index == 1999 || t.index == 3999);
-  EXPECT_EQ(buffer.size(), 0);
+  EXPECT_EQ(buffer.size(), 0u);
   EXPECT_TRUE(buffer.empty());
 
   RTR_INFO("End of BufferLastT test");
@@ -331,7 +331,7 @@ TEST(BufferTest, BufferQueueWithAgingT) {
   BufferRemoveArrayCheck(buffer, array_data, 0);
   FIFOBufferCheck(buffer);
   BufferWaitForCheck(buffer);
-  EXPECT_EQ(buffer.numErased(), 0);
+  EXPECT_EQ(buffer.numErased(), 0u);
 
   AgingBufferCheck(buffer);
 
@@ -348,7 +348,7 @@ TEST(BufferTest, BufferQueueWithAgingTMultiThreaded) {
   auto get_time = [](const Temp& tp) { return tp.time; };
   BufferQueueWithAgingT<Temp> buffer(get_time, AGE_DECAY_TIME_MS);
 
-  EXPECT_EQ(buffer.numErased(), 0);
+  EXPECT_EQ(buffer.numErased(), 0u);
 
   std::vector<Temp> data1, data2, data_removed;
   GenerateData(data1, 100, 200);
@@ -365,7 +365,7 @@ TEST(BufferTest, BufferQueueWithAgingTMultiThreaded) {
   }
 
   int total_data = buffer.size() + buffer.numErased();
-  EXPECT_NE(buffer.numErased(), 0);
+  EXPECT_NE(buffer.numErased(), 0u);
   EXPECT_EQ(total_data, 200);
 
   Temp t;
