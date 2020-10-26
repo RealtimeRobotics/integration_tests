@@ -1,7 +1,8 @@
-#include <QApplication>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <QApplication>
 
 #include <gtest/gtest.h>
 #include <ros/service.h>
@@ -16,7 +17,7 @@ namespace rtr {
 namespace perception {
 
 class RapidSenseTestHelper : public ApplianceTestHelper {
-public:
+ public:
   RapidSenseTestHelper(ros::NodeHandle& nh);
 
   // @brief Get rapidsense server config via ros
@@ -33,8 +34,7 @@ public:
 
   // @brief Check rapidsense server health state matches
   bool CheckRapidSenseServerState(RapidSenseState& state);
-
 };
 
-} // perception
-} // rtr
+}  // namespace perception
+}  // namespace rtr

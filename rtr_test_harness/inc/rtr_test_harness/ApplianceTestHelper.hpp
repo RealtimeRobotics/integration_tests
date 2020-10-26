@@ -2,9 +2,9 @@
 #include <string>
 #include <vector>
 
+#include <ros/node_handle.h>
 #include <ros/ros.h>
 #include <ros/service.h>
-#include <ros/node_handle.h>
 //#include <QApplication>
 #include <gtest/gtest.h>
 
@@ -19,12 +19,11 @@
 namespace rtr {
 
 //! @brief call ros service and check response
-template<typename MessageType> bool CallRosService(ros::NodeHandle& nh,
-                                                   MessageType &srv,
-                                                   const std::string& serv) {
+template <typename MessageType>
+bool CallRosService(ros::NodeHandle& nh, MessageType& srv, const std::string& serv) {
   // TODO: We need a timeout on watiForService, but uncertain of how this
   // can be done without hardcoding
-  if(!ros::service::waitForService(serv)){
+  if (!ros::service::waitForService(serv)) {
     RTR_ERROR("No service {}", serv);
     return false;
   }
@@ -34,9 +33,7 @@ template<typename MessageType> bool CallRosService(ros::NodeHandle& nh,
   if (client.call(srv)) {
     RTR_DEBUG("Success with {}", srv.response);
     return true;
-  }
-  else
-  {
+  } else {
     RTR_ERROR("Failed to call {}", serv);
   }
   return false;
@@ -44,7 +41,7 @@ template<typename MessageType> bool CallRosService(ros::NodeHandle& nh,
 
 // @brief Class to help setup the appliance, as would a rtr customer
 class ApplianceTestHelper {
-public:
+ public:
   ApplianceTestHelper(ros::NodeHandle& nh);
 
   // @brief Install the project zip to appliance
@@ -69,14 +66,13 @@ public:
    * @brief take a json file and set that as the robot_params for the
    * appliance project via ros services
    */
-  bool SetProjectRobotParam(const std::string& prj_name,
-                            const std::string& param_json_path);
+  bool SetProjectRobotParam(const std::string& prj_name, const std::string& param_json_path);
 
   // @brief Get info about the deconfliction group loaded on the appliance
   bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group);
 
-protected:
+ protected:
   ros::NodeHandle nh_;
 };
 
-} // rtr
+}  // namespace rtr

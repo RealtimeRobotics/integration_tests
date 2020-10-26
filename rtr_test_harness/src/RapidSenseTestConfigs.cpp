@@ -1,5 +1,10 @@
 #include "rtr_test_harness/RapidSenseTestConfigs.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+
+#include <rtr_math/MathSchema.hpp>
+
 namespace rtr {
 namespace perception {
 

@@ -423,9 +423,8 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr>& observers,
 
     VoxelRegion region = project->GetVoxelRegion();
     region_desc = VoxelRegionDescription(
-                          {DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION},
-                          region.GetDimensions() / 2.0,
-                          region.GetPose().Inverse());
+        {DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION},
+        region.GetDimensions() / 2.0, region.GetPose().Inverse());
 
     RapidSenseRobotConfig config;
     config.name = project_name;

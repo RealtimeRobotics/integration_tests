@@ -6,9 +6,9 @@
 
 #include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
-#include <ros/service.h>
-
+#include <ros/package.h>
 #include <ros/ros.h>
+#include <ros/service.h>
 #include <std_msgs/Float32.h>
 
 #include <rtr_appliance/Appliance.hpp>
@@ -20,8 +20,11 @@
 #include <rtr_perc_sensors_ros/SensorMsgConverters.hpp>
 #include <rtr_test_harness/RapidSenseTestHelper.hpp>
 #include <rtr_utils/Logging.hpp>
+
 using namespace rtr::perception;
 using namespace rtr;
+
+namespace bfs = boost::filesystem;
 
 // This test only runs for recordings around 15 seconds
 // This test only support cameras of the type INTEL_REALSENSE_D435
@@ -57,9 +60,17 @@ class LatencyTestFixture : public ::testing::Test {
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
-    std::string rapidsense_state_directory;
-    appliance_.CreateAndSetupProject(decon_group_name, project);
+    // use calibration json for now
+    // TODO: replace with one from nas
+    const std::string robot_param = ros::package::getPath("reg_test_calibration_sim")
+                                    + "/../../test_data/ur3_calibration_test/ur3.json";
+    ASSERT_TRUE(appliance_.InstallProject(project));
+    ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
+    ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
+    ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
 
+    std::string rapidsense_state_directory;
     if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
       RTR_ERROR("Unable to get state directory from rapidsense");
     } else {
@@ -86,7 +97,7 @@ class LatencyTestFixture : public ::testing::Test {
 
  public:
   LatencyTestFixture()
-      : nh_(""), appliance_(nh_), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {}
+      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI), appliance_(nh_) {}
 };
 
 class LatencyTracker {
@@ -178,7 +189,8 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "LatencyTest");
   RTR_INFO("new test {}", argc);
   ::testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
+  int res = RUN_ALL_TESTS();
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
+  return res;
 }

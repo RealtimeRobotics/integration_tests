@@ -12,29 +12,29 @@ enum SelectedFrameTypes { DEPTH, EXTRINSICS, INTRINSICS };
 
 bool StartStopSensors(const std::set<std::string>& sensors,
                       const SelectedFrameTypes selected_types) {
-
   std::atomic_bool sensors_ok(true);
-  tbb::parallel_for_each(sensors.begin(), sensors.end(), [&sensors_ok, &selected_types](const std::string& uid) {
-     std::set<SensorFrameType> types;      
-     if (selected_types == SelectedFrameTypes::DEPTH) {
-       types = {SensorFrameType::SENSOR_FRAME_IMAGE_DEPTH}; 
-     } else if (selected_types == SelectedFrameTypes::EXTRINSICS) {
-       types = {SensorManager::getInstance()->GetExtrinsicsCalibrationFrameType(uid)};
-     } else {
-       types = SensorManager::getInstance()->GetIntrinsicsCalibrationFrameTypes(uid);
-     }
+  tbb::parallel_for_each(
+      sensors.begin(), sensors.end(), [&sensors_ok, &selected_types](const std::string& uid) {
+        std::set<SensorFrameType> types;
+        if (selected_types == SelectedFrameTypes::DEPTH) {
+          types = {SensorFrameType::SENSOR_FRAME_IMAGE_DEPTH};
+        } else if (selected_types == SelectedFrameTypes::EXTRINSICS) {
+          types = {SensorManager::getInstance()->GetExtrinsicsCalibrationFrameType(uid)};
+        } else {
+          types = SensorManager::getInstance()->GetIntrinsicsCalibrationFrameTypes(uid);
+        }
 
-     if (!SensorManager::getInstance()->start(uid, types)) {
-       sensors_ok = false;
-     }
-   });
+        if (!SensorManager::getInstance()->start(uid, types)) {
+          sensors_ok = false;
+        }
+      });
   tbb::parallel_for_each(sensors.begin(), sensors.end(),
                          [](const std::string& uid) { SensorManager::getInstance()->stop(uid); });
   return sensors_ok;
 }
 
-bool TestStartStopSensors(const std::set<std::string>& sensors,
-                          const SelectedFrameTypes types, const bool has_serial_killer) {
+bool TestStartStopSensors(const std::set<std::string>& sensors, const SelectedFrameTypes types,
+                          const bool has_serial_killer) {
   // if sensors could not start / stop, recover them and try again
   // if serial killer is not present, log error but allow the test to pass
   if (!StartStopSensors(sensors, types)) {

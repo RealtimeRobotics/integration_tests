@@ -208,7 +208,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   //// Test AcquireControl
   EXPECT_TRUE(proxy->AcquireControl());
   // TODO: Robot controller does not actually register as active (inner robot interface will be
-  // active). Still waiting to hear back from robotics team on this, but it seems like they're 
+  // active). Still waiting to hear back from robotics team on this, but it seems like they're
   // in the middle of a refactor
   // EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::ACTIVE);
   EXPECT_FALSE(controller->HasError());
@@ -246,7 +246,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   EXPECT_TRUE(proxy->ReleaseControl());
   EXPECT_FALSE(controller->HasError());
   // TODO: Robot controller does not return true because it expects to be in HANDOFF
-  // CONNECTED). Still waiting to hear back from robotics team on this, but it seems like they're 
+  // CONNECTED). Still waiting to hear back from robotics team on this, but it seems like they're
   // in the middle of a refactor
 
   proxy->Shutdown();

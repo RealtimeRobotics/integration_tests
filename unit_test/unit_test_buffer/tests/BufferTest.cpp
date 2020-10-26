@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <rtr_utils/Logging.hpp>
-
 #include <rtr_perc_api/Buffer.hpp>
+#include <rtr_utils/Logging.hpp>
 
 using namespace rtr;
 using namespace rtr::perception;
@@ -50,7 +49,7 @@ void RemoveData(BufferInterface<Temp>& buffer, const int& num_remove,
   for (int i = 0; i < num_remove; i++) {
     Temp t;
     std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
-    if(!buffer.get(t)){
+    if (!buffer.get(t)) {
       i--;
       continue;
     }

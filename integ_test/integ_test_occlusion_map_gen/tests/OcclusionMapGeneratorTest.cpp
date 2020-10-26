@@ -4,14 +4,12 @@
 
 #include <gtest/gtest.h>
 
-#include <rtr_utils/PackagePath.hpp>
-
-#include <rtr_perc_spatial/PerceptionTestUtils.hpp>
 #include <rtr_perc_spatial/OcclusionMapGenerator.hpp>
+#include <rtr_perc_spatial/PerceptionTestUtils.hpp>
+#include <rtr_utils/PackagePath.hpp>
 
 using namespace rtr;
 using namespace rtr::perception;
-
 
 const std::string OG_PATH = "data/87791cc3-7698-406a-906b-6adccdfb0abd.og";
 const std::string CONFIG_PATH = "data/config.xml";
@@ -26,12 +24,13 @@ TEST(OcclusionMapGenerator, SimulationRunTest) {
 
   RobotObserver::Ptr robot = testutils::CreateRobotObserver(testutils::UR3_MODEL_NAME);
   RobotMaskGenerator::MeshMap mesh_map;
-  EXPECT_NO_THROW(rtr::LoadFile(DILATED_MESH_PATH, mesh_map, rtr::Format::BOOST_BINARY,rtr::Encoding::BINARY_RAW));
+  EXPECT_NO_THROW(rtr::LoadFile(DILATED_MESH_PATH, mesh_map, rtr::Format::BOOST_BINARY,
+                                rtr::Encoding::BINARY_RAW));
 
   std::string robot_name = robot->GetName();
-  std::map<std::string, OGFileReader> ogs = { {robot_name, og_reader} };
-  std::map<std::string, RobotObserver::Ptr> robots = { {robot_name, robot} }; 
-  std::map<std::string, RobotMaskGenerator::MeshMap> mesh_maps = { {robot_name, mesh_map} }; 
+  std::map<std::string, OGFileReader> ogs = {{robot_name, og_reader}};
+  std::map<std::string, RobotObserver::Ptr> robots = {{robot_name, robot}};
+  std::map<std::string, RobotMaskGenerator::MeshMap> mesh_maps = {{robot_name, mesh_map}};
 
   SpatialPerceptionProjectSchema config;
   EXPECT_TRUE(config.Deserialize(CONFIG_PATH));
@@ -71,7 +70,7 @@ TEST(OcclusionMapGenerator, SimulationRunTest) {
   for (int x = 0; x < 64; x++) {
     for (int y = 0; y < 64; y++) {
       for (int z = 0; z < 64; z++) {
-        int val = output(x,y,z);
+        int val = output(x, y, z);
         if (val) {
           EXPECT_LE(val, 100);
           count++;
@@ -83,7 +82,6 @@ TEST(OcclusionMapGenerator, SimulationRunTest) {
   EXPECT_GT(count, 0);
   RTR_INFO("Ending OcclusionMapGenerator Simulation Run Test");
 }
-
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

@@ -1,10 +1,12 @@
-#include <QApplication>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <QApplication>
+
 #include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
+#include <ros/package.h>
 #include <ros/service.h>
 
 #include <rtr_msgs/GetHubConfig.h>
@@ -21,6 +23,8 @@
 using namespace rtr::perception;
 using namespace rtr;
 
+namespace bfs = boost::filesystem;
+
 int main(int argc, char** argv) {
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_sim");
@@ -31,13 +35,14 @@ int main(int argc, char** argv) {
   server.SetUp("appliance_test", rs_path);
 
   ::testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
+  int res = RUN_ALL_TESTS();
 
   server.Teardown();
   // TODO Do not hard code. The appliance/rapidsense may end up using different
   // directories during runtime.
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
+  return res;
 }
 
 class CalibrationTestFixture : public ::testing::Test {
@@ -45,8 +50,8 @@ class CalibrationTestFixture : public ::testing::Test {
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
-  std::string decon_group_name, robot_name, flange_frame, hub_name, project,
-              rapidsense_data, robot_param;
+  std::string decon_group_name, robot_name, flange_frame, hub_name, project, rapidsense_data,
+      robot_param;
 
   void SetUp() override {
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
@@ -96,18 +101,14 @@ class CalibrationTestFixture : public ::testing::Test {
     // If the proxy cannot get the state directory, that means it rapidsense
     // will use the default path in /var/lib/rtr_spatial_perception. That
     // will still need to be removed for proper teardown
-    std::string rapidsense_data_directory = fmt::format("{}/{}/",rapidsense_state_directory, decon_group_name);
+    std::string rapidsense_data_directory =
+        fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
     bfs::remove_all(rapidsense_data_directory);
   }
 
  public:
   CalibrationTestFixture()
-      : nh_(""), appliance_(nh_), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {}
-  CalibrationTestFixture(ros::NodeHandle& nh)
-      : nh_(nh), appliance_(nh_), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {
-    // Start our proxy_ as the Rapidsense gui so the server doesn't automatically try to transition
-    // while we are testing
-  }
+      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI), appliance_(nh_) {}
 };
 
 TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {

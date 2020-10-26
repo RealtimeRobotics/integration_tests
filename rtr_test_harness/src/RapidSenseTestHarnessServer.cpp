@@ -1,5 +1,7 @@
 #include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_appliance/Appliance.hpp>
 #include <rtr_control_ros/RosController.hpp>
@@ -10,6 +12,8 @@
 #include <rtr_utils/Backtrace.hpp>
 #include <rtr_utils/Logging.hpp>
 #include <rtr_voxelize/VoxelizerFactory.hpp>
+
+namespace bfs = boost::filesystem;
 
 // using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 
