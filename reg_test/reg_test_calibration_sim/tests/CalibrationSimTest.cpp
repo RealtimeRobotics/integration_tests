@@ -26,6 +26,8 @@ using namespace rtr;
 namespace bfs = boost::filesystem;
 
 int main(int argc, char** argv) {
+  bfs::remove_all("/tmp/appliance_test");
+  bfs::remove_all("/tmp/rapidsense_test");
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_sim");
 

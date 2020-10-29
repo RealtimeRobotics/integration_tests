@@ -26,17 +26,18 @@ int main(int argc, char** argv) {
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_sim");
 
-  ros::init(argc, argv, "CalibrationSimTest");
+  ros::init(argc, argv, "RecordPlaybackSimTest");
   RapidSenseTestHarnessServer server;
   std::string rs_path=ros::package::getPath("reg_test_calibration_sim") + "/../../test_data";
   server.SetUp("appliance_test", rs_path);
 
   ::testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
+  int res = RUN_ALL_TESTS();
   
   server.Teardown();
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
+  return res;
 }
 
 class RapidSenseTestFixture : public ::testing::Test {
@@ -45,7 +46,7 @@ class RapidSenseTestFixture : public ::testing::Test {
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
-  std::string decon_group_name, robot_name, project, rapidsense_data;
+  std::string decon_group_name, robot_name, project, rapidsense_data, robot_param;
   
   void SetUp() override {
       nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
@@ -55,6 +56,8 @@ class RapidSenseTestFixture : public ::testing::Test {
       
       project = ros::package::getPath("reg_test_calibration_sim") + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
       rapidsense_data = ros::package::getPath("reg_test_calibration_sim") + "/../../test_data/ur3_calibration_test/rapidsense_data/";
+          robot_param = ros::package::getPath("reg_test_calibration_sim")
+                  + "/../../test_data/ur3_calibration_test/ur3.json";
       RTR_INFO("Value of project={}", project);
       RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
@@ -63,8 +66,12 @@ class RapidSenseTestFixture : public ::testing::Test {
       if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
         RTR_ERROR("Unable to get state directory from rapidsense");
       }
-      
-      appliance_.CreateAndSetupProject(decon_group_name, project);
+
+      ASSERT_TRUE(appliance_.InstallProject(project));
+      ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
+      ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
+      ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
+      ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
 
       std::string rapidsense_data_directory = fmt::format("{}/{}/",rapidsense_state_directory, decon_group_name);
       CopyFolder(rapidsense_data, rapidsense_data_directory);
@@ -78,7 +85,17 @@ class RapidSenseTestFixture : public ::testing::Test {
   }
 
   void TearDown() override {
+    std::string rapidsense_state_directory;
+    if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
+      RTR_ERROR("Unable to get state directory from rapidsense");
+    }
 
+    // If the proxy cannot get the state directory, that means it rapidsense
+    // will use the default path in /var/lib/rtr_spatial_perception. That
+    // will still need to be removed for proper teardown
+    std::string rapidsense_data_directory =
+        fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
+    bfs::remove_all(rapidsense_data_directory);
   }
     
 public:
@@ -107,19 +124,19 @@ TEST_F(RapidSenseTestFixture, VerifyRobotFilterSimulatedCamera) {
   EXPECT_TRUE(!voxels.empty());
   
   bool recording_result;
-  std::thread recording_thread = std::thread([this]() {
+  std::thread recording_thread = std::thread([this, &recording_result]() {
     recording_result = proxy_.StartRecording("test_recording", 5);
   });
 
   std::map<JointConfiguration, std::vector<Voxel>> voxel_map;
-  RobotObserver::Ptr active_observer = GetActiveRobotObserver();
+  RobotObserver::Ptr active_observer = proxy_.GetActiveRobotObserver();
   std::string teleport_topic = fmt::format("/{}/teleport_robot", robot_name);
-  ros::serviceClient teleport_service = nh_.serviceClient<rtr_msgs::TeleportRobot(teleport_topic);
+  ros::ServiceClient teleport_service = nh_.serviceClient<rtr_msgs::TeleportRobot>(teleport_topic);
 
   rtr::JointConfiguration joint_config_1 = rtr::JointConfiguration({0,0,0,0,0,0});
   rtr_msgs::TeleportRobot teleport_srv_1;
   teleport_srv_1.request.joint_config = joint_config_1.GetData();
-  EXPECT_TRUE(teleport_service.call(teleport_srv_1) && teleport_srv_1.response.is_sucess);
+  EXPECT_TRUE(teleport_service.call(teleport_srv_1) && teleport_srv_1.response.is_success);
 
   imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
   voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
@@ -127,13 +144,13 @@ TEST_F(RapidSenseTestFixture, VerifyRobotFilterSimulatedCamera) {
   voxel_ptr->GetVoxels(voxels);
   voxel_map[joint_config_1] = voxels;
 
-  ros::rate r(1.0);
+  ros::Rate r(1.0);
   r.sleep();
 
-  rtr::JointConfiguration joint_config_2 = rtr::JointConfiguration({PI,PI,PI,PI,PI,PI});
+  rtr::JointConfiguration joint_config_2 = rtr::JointConfiguration({Pi,Pi,Pi,Pi,Pi,Pi});
   rtr_msgs::TeleportRobot teleport_srv_2;
   teleport_srv_2.request.joint_config = joint_config_2.GetData();
-  EXPECT_TRUE(teleport_service.call(teleport_srv_2) && teleport_srv_1.response.is_sucess);
+  EXPECT_TRUE(teleport_service.call(teleport_srv_2) && teleport_srv_1.response.is_success);
 
   imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
   voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
@@ -142,16 +159,16 @@ TEST_F(RapidSenseTestFixture, VerifyRobotFilterSimulatedCamera) {
   voxel_map[joint_config_2] = voxels;
 
   recording_thread.join();
-  EXPECT_TRUE(recorindg_result);
+  EXPECT_TRUE(recording_result);
   RTR_INFO("Finished Recording");
 
   bool playback_result;
-  std::thread playback_thread = std::thread([this]() {
+  std::thread playback_thread = std::thread([this, &playback_result]() {
     playback_result = proxy_.StartPlayback("test_recording", 1.0, false);
   });
   
-  ros::rate loop_rate(20);
-  while (active_observer_->GetCurrentJointConfiguration() != joint_config_1) {
+  ros::Rate loop_rate(20);
+  while (active_observer->GetCurrentJointConfiguration() != joint_config_1) {
    loop_rate.sleep();
   }
 
@@ -161,7 +178,7 @@ TEST_F(RapidSenseTestFixture, VerifyRobotFilterSimulatedCamera) {
   voxel_ptr->GetVoxels(voxels);
   EXPECT_EQ(voxels, voxel_map[joint_config_1]);
 
-  while (active_observer_->GetCurrentJointConfiguration() != joint_config_2) {
+  while (active_observer->GetCurrentJointConfiguration() != joint_config_2) {
     loop_rate.sleep();
   }
  

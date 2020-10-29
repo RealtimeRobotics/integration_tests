@@ -116,5 +116,5 @@ include_directories(SYSTEM
 ## Testing ##
 #############
 
-rs_add_rostest(CalibrationSimTest)
-rs_add_rostest(RecordPlaybackSimTest record_playback)
+# rs_add_rostest(CalibrationSimTest)
+rs_add_rostest(RecordPlaybackSimTest)
