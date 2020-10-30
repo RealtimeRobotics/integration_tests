@@ -64,7 +64,7 @@ class CalibrationTestFixture : public ::testing::Test {
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
 
     project = ros::package::getPath("reg_test_calibration_sim")
-              + "/../../test_data/ur3_calibration_test/ur3-obstacle.zip";
+              + "/../../test_data/ur3_calibration_test/ur3.zip";
     rapidsense_data = ros::package::getPath("reg_test_calibration_sim")
                       + "/../../test_data/ur3_calibration_test/rapidsense_data/";
     robot_param = ros::package::getPath("reg_test_calibration_sim")
@@ -76,6 +76,9 @@ class CalibrationTestFixture : public ::testing::Test {
     if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
       RTR_ERROR("Unable to get state directory from rapidsense");
     }
+        std::string rapidsense_data_directory =
+        fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
+    CopyFolder(rapidsense_data, rapidsense_data_directory);
 
     ASSERT_TRUE(appliance_.ClearApplianceDatabase());
     ASSERT_TRUE(appliance_.InstallProject(project));
@@ -83,10 +86,6 @@ class CalibrationTestFixture : public ::testing::Test {
     ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
     ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
     ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
-
-    std::string rapidsense_data_directory =
-        fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
-    CopyFolder(rapidsense_data, rapidsense_data_directory);
 
     std_srvs::Trigger trg;
     CallRosService<std_srvs::Trigger>(nh_, trg, "/restart_sim");

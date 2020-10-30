@@ -7,3 +7,4 @@
 *.xml filter=lfs diff=lfs merge=lfs -text
 *.og filter=lfs diff=lfs merge=lfs -text
 *package.xml -filter=lfs -diff=lfs -merge=lfs -text
+test_data/ur3_calibration_test/ur3.zip filter=lfs diff=lfs merge=lfs -text
