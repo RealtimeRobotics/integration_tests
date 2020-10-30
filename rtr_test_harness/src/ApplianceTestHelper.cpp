@@ -37,7 +37,7 @@ ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
   CallRosService<rtr_msgs::SetEULAAccepted>(nh_, srv, "/SetEULAAccepted");
 }
 
-bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
+bool ApplianceTestHelper::InstallProject(const std::string &project_zip) {
   rtr_msgs::InstallProject srv;
   srv.request.zip_file_path = project_zip;
   if (!CallRosService<rtr_msgs::InstallProject>(nh_, srv, "/InstallProject")) {
@@ -46,9 +46,11 @@ bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
   return true;
 }
 
-bool ApplianceTestHelper::GetInstalledProjects(std::vector<std::string>& projects) {
+bool ApplianceTestHelper::GetInstalledProjects(
+    std::vector<std::string> &projects) {
   rtr_msgs::GetProjectList msg_prjs;
-  if (!CallRosService<rtr_msgs::GetProjectList>(nh_, msg_prjs, "/GetProjectList")) {
+  if (!CallRosService<rtr_msgs::GetProjectList>(nh_, msg_prjs,
+                                                "/GetProjectList")) {
     return false;
   }
   projects = std::vector<std::string>(msg_prjs.response.projects);
@@ -56,7 +58,8 @@ bool ApplianceTestHelper::GetInstalledProjects(std::vector<std::string>& project
   return true;
 }
 
-bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group_name) {
+bool ApplianceTestHelper::AddAllProjectsToDeconGroup(
+    const std::string &dc_group_name) {
   // Create the decon group
   rtr_msgs::DeconGroup msg_grp;
   msg_grp.request.group_name = dc_group_name;
@@ -71,11 +74,12 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group
   }
 
   // Add all installed projects to the decon group
-  for (const auto& P : projects) {
+  for (const auto &P : projects) {
     rtr_msgs::GroupProject msg_add_prj;
     msg_add_prj.request.group_name = dc_group_name;
     msg_add_prj.request.project_name = P;
-    if (!CallRosService<rtr_msgs::GroupProject>(nh_, msg_add_prj, "/AddProjectToGroup")) {
+    if (!CallRosService<rtr_msgs::GroupProject>(nh_, msg_add_prj,
+                                                "/AddProjectToGroup")) {
       return false;
     }
   }
@@ -92,18 +96,20 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group
   return true;
 }
 
-bool ApplianceTestHelper::SetVisionEnabled(const std::string& dc_group_name, bool is_enabled) {
+bool ApplianceTestHelper::SetVisionEnabled(const std::string &dc_group_name,
+                                           bool is_enabled) {
   rtr_msgs::SetVisionEnabled srv;
   srv.request.group_name = dc_group_name;
   srv.request.enabled = is_enabled;
-  if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
+  if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv,
+                                                  "/SetVisionEnabled")) {
     return false;
   }
 
   return true;
 }
 
-bool ApplianceTestHelper::LoadGroup(const std::string& dc_group_name) {
+bool ApplianceTestHelper::LoadGroup(const std::string &dc_group_name) {
   rtr_msgs::DeconGroup srv;
   srv.request.group_name = dc_group_name;
   if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/LoadGroup")) {
@@ -113,7 +119,7 @@ bool ApplianceTestHelper::LoadGroup(const std::string& dc_group_name) {
   return true;
 }
 
-bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
+bool ApplianceTestHelper::UnloadGroup(const std::string &dc_group_name) {
   rtr_msgs::DeconGroup srv;
   srv.request.group_name = dc_group_name;
   if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/UnloadGroup")) {
@@ -123,8 +129,8 @@ bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
   return true;
 }
 
-bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
-                                               const std::string& param_json_path) {
+bool ApplianceTestHelper::SetProjectRobotParam(
+    const std::string &prj_name, const std::string &param_json_path) {
   // take the robot_param json file and create a json obj
   std::ifstream ifs(param_json_path);
   nlohmann::json j = nlohmann::json::parse(ifs);
@@ -133,21 +139,22 @@ bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
   rtr_msgs::UpdateProject srv;
   srv.request.project_name = prj_name;
   srv.request.json_data = j.dump();
-  if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject")
-      || srv.response.result_code != 0) {
+  if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject") ||
+      srv.response.result_code != 0) {
     return false;
   }
 
   return true;
 }
 
-bool ApplianceTestHelper::GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group) {
+bool ApplianceTestHelper::GetLoadedDeconGroup(
+    rtr_msgs::DeconGroupInfo &loaded_group) {
   rtr_msgs::GetGroupInfo srv;
   if (!CallRosService<rtr_msgs::GetGroupInfo>(nh_, srv, "/GetDeconGroupInfo")) {
     return false;
   }
 
-  for (const auto& group : srv.response.groups) {
+  for (const auto &group : srv.response.groups) {
     if (group.loaded) {
       loaded_group = group;
       return true;
@@ -214,3 +221,4 @@ bool ApplianceTestHelper::TeleportToHub(const std::string& robot_name,
 }
 
 }  // namespace rtr
+

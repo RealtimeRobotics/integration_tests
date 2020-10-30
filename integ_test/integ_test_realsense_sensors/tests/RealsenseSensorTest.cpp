@@ -10,43 +10,52 @@ using namespace rtr::perception;
 
 enum SelectedFrameTypes { DEPTH, EXTRINSICS, INTRINSICS };
 
-bool StartStopSensors(const std::set<std::string>& sensors,
+bool StartStopSensors(const std::set<std::string> &sensors,
                       const SelectedFrameTypes selected_types) {
   std::atomic_bool sensors_ok(true);
   tbb::parallel_for_each(
-      sensors.begin(), sensors.end(), [&sensors_ok, &selected_types](const std::string& uid) {
+      sensors.begin(), sensors.end(),
+      [&sensors_ok, &selected_types](const std::string &uid) {
         std::set<SensorFrameType> types;
         if (selected_types == SelectedFrameTypes::DEPTH) {
           types = {SensorFrameType::SENSOR_FRAME_IMAGE_DEPTH};
         } else if (selected_types == SelectedFrameTypes::EXTRINSICS) {
-          types = {SensorManager::getInstance()->GetExtrinsicsCalibrationFrameType(uid)};
+          types = {
+              SensorManager::getInstance()->GetExtrinsicsCalibrationFrameType(
+                  uid)};
         } else {
-          types = SensorManager::getInstance()->GetIntrinsicsCalibrationFrameTypes(uid);
+          types =
+              SensorManager::getInstance()->GetIntrinsicsCalibrationFrameTypes(
+                  uid);
         }
 
         if (!SensorManager::getInstance()->start(uid, types)) {
           sensors_ok = false;
         }
       });
-  tbb::parallel_for_each(sensors.begin(), sensors.end(),
-                         [](const std::string& uid) { SensorManager::getInstance()->stop(uid); });
+  tbb::parallel_for_each(
+      sensors.begin(), sensors.end(),
+      [](const std::string &uid) { SensorManager::getInstance()->stop(uid); });
   return sensors_ok;
 }
 
-bool TestStartStopSensors(const std::set<std::string>& sensors, const SelectedFrameTypes types,
+bool TestStartStopSensors(const std::set<std::string> &sensors,
+                          const SelectedFrameTypes types,
                           const bool has_serial_killer) {
   // if sensors could not start / stop, recover them and try again
   // if serial killer is not present, log error but allow the test to pass
   if (!StartStopSensors(sensors, types)) {
     if (has_serial_killer) {
-      RTR_ERROR("Failed to start and stop sensors. Attempting to recover malfunctioning devices");
-      EXPECT_FALSE(SensorManager::getInstance()->RecoverMalfunctioningDevices().empty());
+      RTR_ERROR("Failed to start and stop sensors. Attempting to recover "
+                "malfunctioning devices");
+      EXPECT_FALSE(
+          SensorManager::getInstance()->RecoverMalfunctioningDevices().empty());
       EXPECT_TRUE(SensorManager::getInstance()->connect(sensors));
       return StartStopSensors(sensors, types);
     } else {
-      RTR_ERROR(
-          "Failed to start and stop sensors, but no serial killer is present. Allowing test to "
-          "pass");
+      RTR_ERROR("Failed to start and stop sensors, but no serial killer is "
+                "present. Allowing test to "
+                "pass");
     }
   }
   return true;
@@ -60,7 +69,8 @@ TEST(RealsenseSensor, SerialKillerReconnect) {
 
   std::string serial;
   if (!SerialKiller::GetInstance()->SerialNumber(serial) || serial.empty()) {
-    RTR_WARN("No serial killer discovered. Skipping test RealsenseSensor::SerialKillerReconnect");
+    RTR_WARN("No serial killer discovered. Skipping test "
+             "RealsenseSensor::SerialKillerReconnect");
     return;
   }
 
@@ -70,16 +80,17 @@ TEST(RealsenseSensor, SerialKillerReconnect) {
   // check for sensors, skip if not available
   std::set<std::string> sensors = smgr->discover();
   if (sensors.empty()) {
-    RTR_WARN("No sensors discovered. Skipping test RealsenseSensor::SerialKillerReconnect");
+    RTR_WARN("No sensors discovered. Skipping test "
+             "RealsenseSensor::SerialKillerReconnect");
     return;
   }
 
   // check that sensors can be connected, skip if not possible
   if (!smgr->connect(sensors)) {
     smgr->disconnect(sensors);
-    RTR_WARN(
-        "Sensors could not be connected. Firmware update may be required. Skipping test "
-        "RealsenseSensor::NormalDeviceUsage");
+    RTR_WARN("Sensors could not be connected. Firmware update may be required. "
+             "Skipping test "
+             "RealsenseSensor::NormalDeviceUsage");
     return;
   }
 
@@ -113,16 +124,17 @@ TEST(RealsenseSensor, NormalDeviceUsage) {
   // check for sensors, skip if not available
   std::set<std::string> sensors = smgr->discover();
   if (sensors.empty()) {
-    RTR_WARN("No sensors discovered. Skipping test RealsenseSensor::NormalDeviceUsage");
+    RTR_WARN("No sensors discovered. Skipping test "
+             "RealsenseSensor::NormalDeviceUsage");
     return;
   }
 
   // check that sensors can be connected, skip if not possible
   if (!smgr->connect(sensors)) {
     smgr->disconnect(sensors);
-    RTR_WARN(
-        "Sensors could not be connected. Firmware update may be required. Skipping test "
-        "RealsenseSensor::NormalDeviceUsage");
+    RTR_WARN("Sensors could not be connected. Firmware update may be required. "
+             "Skipping test "
+             "RealsenseSensor::NormalDeviceUsage");
     return;
   }
 
@@ -143,9 +155,12 @@ TEST(RealsenseSensor, NormalDeviceUsage) {
   ASSERT_TRUE(smgr->connect(sensors));
 
   //// Test start / stop
-  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::DEPTH, has_serial_killer));
-  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::EXTRINSICS, has_serial_killer));
-  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::INTRINSICS, has_serial_killer));
+  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::DEPTH,
+                                   has_serial_killer));
+  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::EXTRINSICS,
+                                   has_serial_killer));
+  EXPECT_TRUE(TestStartStopSensors(sensors, SelectedFrameTypes::INTRINSICS,
+                                   has_serial_killer));
 
   keep_going_.store(false);
   if (run_updates.joinable()) {
@@ -156,7 +171,7 @@ TEST(RealsenseSensor, NormalDeviceUsage) {
   smgr->shutdown();
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   RapidSenseMessage::Setup(false);
 
   SensorManager::Init();

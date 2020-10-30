@@ -11,9 +11,10 @@
 using namespace rtr;
 using namespace rtr::perception;
 
-void RunMaskTest(const RobotMaskGenerator::Type type, const std::string& robot_model,
-                 const int fill_tolerance, const int match_tolerance,
-                 const std::vector<JointConfiguration>& configs) {
+void RunMaskTest(const RobotMaskGenerator::Type type,
+                 const std::string &robot_model, const int fill_tolerance,
+                 const int match_tolerance,
+                 const std::vector<JointConfiguration> &configs) {
   // Set up robot and environment
   RobotObserver::Ptr observer = testutils::CreateRobotObserver(robot_model);
   ASSERT_TRUE(observer);
@@ -26,43 +27,45 @@ void RunMaskTest(const RobotMaskGenerator::Type type, const std::string& robot_m
   arena.initialize(std::max(1, int(0.25 * arena.max_concurrency())));
 
   // Create mask generator
-  RobotMaskGenerator::Ptr generator =
-      RobotFilter::CreateRobotMaskGenerator(type, mesh_map, observer, vrd, arena);
+  RobotMaskGenerator::Ptr generator = RobotFilter::CreateRobotMaskGenerator(
+      type, mesh_map, observer, vrd, arena);
   ASSERT_TRUE(generator);
   generator->Init();
 
-  EXPECT_TRUE(testutils::RobotFilterAccuracyTest(observer, mesh_map, vrd, generator, fill_tolerance,
+  EXPECT_TRUE(testutils::RobotFilterAccuracyTest(observer, mesh_map, vrd,
+                                                 generator, fill_tolerance,
                                                  match_tolerance, configs));
   generator->Shutdown();
 }
 
-// The other RobotMaskGenerator tests are kept in rtr_perc_spatial, but the OpenCL ones require
-// resources which are not guaranteed to the rapidplan-ci stage
+// The other RobotMaskGenerator tests are kept in rtr_perc_spatial, but the
+// OpenCL ones require resources which are not guaranteed to the rapidplan-ci
+// stage
 TEST(OpenCLRobotMaskGenerator, URTest) {
   const int fill_tolerance = 0;
   // Some surface details different between OpenCL and Collision
   const int match_tolerance = 1;
-  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::UR5_MODEL_NAME, fill_tolerance,
-              match_tolerance, testutils::UR5_JOINTS);
+  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::UR5_MODEL_NAME,
+              fill_tolerance, match_tolerance, testutils::UR5_JOINTS);
 }
 
 TEST(OpenCLRobotMaskGenerator, FanucTest) {
   const int fill_tolerance = 0;
   // Some surface details different between OpenCL and Collision
   const int match_tolerance = 1;
-  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::FANUC_MODEL_NAME, fill_tolerance,
-              match_tolerance, testutils::FANUC_JOINTS);
+  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::FANUC_MODEL_NAME,
+              fill_tolerance, match_tolerance, testutils::FANUC_JOINTS);
 }
 
 TEST(OpenCLRobotMaskGenerator, MelcoTest) {
   const int fill_tolerance = 0;
   // Some surface details different between OpenCL and Collision
   const int match_tolerance = 1;
-  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::MELCO_MODEL_NAME, fill_tolerance,
-              match_tolerance, testutils::MELCO_JOINTS);
+  RunMaskTest(RobotMaskGenerator::OPENCL, testutils::MELCO_MODEL_NAME,
+              fill_tolerance, match_tolerance, testutils::MELCO_JOINTS);
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

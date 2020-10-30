@@ -5,13 +5,14 @@
 using namespace rtr::perception;
 using namespace rtr;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc != 2) {
     std::cout << "Usage: RunRapidSenseTests <dir name>" << std::endl;
     return EXIT_FAILURE;
   }
 
-  if (!boost::filesystem::exists(argv[1]) || !boost::filesystem::is_directory(argv[1])) {
+  if (!boost::filesystem::exists(argv[1]) ||
+      !boost::filesystem::is_directory(argv[1])) {
     std::cout << "Directory " << argv[1] << " does not exist" << std::endl;
     return EXIT_FAILURE;
   }
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]) {
       return EXIT_FAILURE;
     }
   } else {
-    for (const auto& dir : test_dirs) {
+    for (const auto &dir : test_dirs) {
       RapidSenseTest test;
       if (test.Init(dir)) {
         test.Run(true, true);

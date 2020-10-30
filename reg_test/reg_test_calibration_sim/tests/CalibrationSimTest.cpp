@@ -25,7 +25,7 @@ using namespace rtr;
 
 namespace bfs = boost::filesystem;
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
   QApplication app(argc, argv);
@@ -33,7 +33,8 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "CalibrationSimTest");
   RapidSenseTestHarnessServer server;
-  std::string rs_path = ros::package::getPath("reg_test_calibration_sim") + "/../../test_data";
+  std::string rs_path =
+      ros::package::getPath("reg_test_calibration_sim") + "/../../test_data";
   server.SetUp("appliance_test", rs_path);
 
   ::testing::InitGoogleTest(&argc, argv);
@@ -48,27 +49,28 @@ int main(int argc, char** argv) {
 }
 
 class CalibrationTestFixture : public ::testing::Test {
- protected:
+protected:
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
-  std::string decon_group_name, robot_name, flange_frame, hub_name, project, rapidsense_data,
-      robot_param;
+  std::string decon_group_name, robot_name, flange_frame, hub_name, project,
+      rapidsense_data, robot_param;
 
   void SetUp() override {
-    nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
+    nh_.param<std::string>("decon_group_name", decon_group_name,
+                           "ur3_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("flange_frame", flange_frame, "ur3/flange");
     nh_.param<std::string>("hub_name", hub_name, "h_3");
     nh_.param<std::string>("project", project, "../../");
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
 
-    project = ros::package::getPath("reg_test_calibration_sim")
-              + "/../../test_data/ur3_calibration_test/ur3.zip";
-    rapidsense_data = ros::package::getPath("reg_test_calibration_sim")
-                      + "/../../test_data/ur3_calibration_test/rapidsense_data/";
-    robot_param = ros::package::getPath("reg_test_calibration_sim")
-                  + "/../../test_data/ur3_calibration_test/ur3.json";
+    project = ros::package::getPath("reg_test_calibration_sim") +
+              "/../../test_data/ur3_calibration_test/ur3.zip";
+    rapidsense_data = ros::package::getPath("reg_test_calibration_sim") +
+                      "/../../test_data/ur3_calibration_test/rapidsense_data/";
+    robot_param = ros::package::getPath("reg_test_calibration_sim") +
+                  "/../../test_data/ur3_calibration_test/ur3.json";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
@@ -76,7 +78,8 @@ class CalibrationTestFixture : public ::testing::Test {
     if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
       RTR_ERROR("Unable to get state directory from rapidsense");
     }
-        std::string rapidsense_data_directory =
+
+    std::string rapidsense_data_directory =
         fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
     CopyFolder(rapidsense_data, rapidsense_data_directory);
 
@@ -108,9 +111,10 @@ class CalibrationTestFixture : public ::testing::Test {
     bfs::remove_all(rapidsense_data_directory);
   }
 
- public:
+public:
   CalibrationTestFixture()
-      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI), appliance_(nh_) {}
+      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI),
+        appliance_(nh_) {}
 };
 
 TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
@@ -139,7 +143,7 @@ TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
   std::vector<std::string> uids(cameras_set.begin(), cameras_set.end());
 
   AllSensorData pre_calibration_data = proxy_.GetCalibration();
-  for (const std::string& uid : uids) {
+  for (const std::string &uid : uids) {
     EXPECT_TRUE(proxy_.EnableCalibrator(uid));
   }
   std::vector<std::string> failed_uids;

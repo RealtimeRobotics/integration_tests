@@ -22,23 +22,28 @@ TEST(OcclusionMapGenerator, SimulationRunTest) {
   OGFileReader og_reader(OG_PATH);
   EXPECT_TRUE(og_reader.IsValid());
 
-  RobotObserver::Ptr robot = testutils::CreateRobotObserver(testutils::UR3_MODEL_NAME);
+  RobotObserver::Ptr robot =
+      testutils::CreateRobotObserver(testutils::UR3_MODEL_NAME);
   RobotMaskGenerator::MeshMap mesh_map;
-  EXPECT_NO_THROW(rtr::LoadFile(DILATED_MESH_PATH, mesh_map, rtr::Format::BOOST_BINARY,
+  EXPECT_NO_THROW(rtr::LoadFile(DILATED_MESH_PATH, mesh_map,
+                                rtr::Format::BOOST_BINARY,
                                 rtr::Encoding::BINARY_RAW));
 
   std::string robot_name = robot->GetName();
   std::map<std::string, OGFileReader> ogs = {{robot_name, og_reader}};
   std::map<std::string, RobotObserver::Ptr> robots = {{robot_name, robot}};
-  std::map<std::string, RobotMaskGenerator::MeshMap> mesh_maps = {{robot_name, mesh_map}};
+  std::map<std::string, RobotMaskGenerator::MeshMap> mesh_maps = {
+      {robot_name, mesh_map}};
 
   SpatialPerceptionProjectSchema config;
   EXPECT_TRUE(config.Deserialize(CONFIG_PATH));
-  config.sensors_folder = rtr::utils::RelativeToAbsolutePath(CALIBRATION_FOLDER);
+  config.sensors_folder =
+      rtr::utils::RelativeToAbsolutePath(CALIBRATION_FOLDER);
 
   OcclusionMapGenerator::Ptr map_gen = nullptr;
 
-  EXPECT_NO_THROW(map_gen = OcclusionMapGenerator::MakePtr(ogs, config, robots, mesh_maps));
+  EXPECT_NO_THROW(
+      map_gen = OcclusionMapGenerator::MakePtr(ogs, config, robots, mesh_maps));
 
   EXPECT_NE(map_gen, nullptr);
 
@@ -83,7 +88,7 @@ TEST(OcclusionMapGenerator, SimulationRunTest) {
   RTR_INFO("Ending OcclusionMapGenerator Simulation Run Test");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   QApplication app(argc, argv);
   return RUN_ALL_TESTS();

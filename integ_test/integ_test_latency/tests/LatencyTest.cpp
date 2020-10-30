@@ -37,33 +37,37 @@ namespace bfs = boost::filesystem;
 #define last_diff_std 0.050
 
 class LatencyTestFixture : public ::testing::Test {
- protected:
+protected:
   ros::NodeHandle nh_;
   RapidSenseFrontEndProxy proxy_;
   RapidSenseTestHelper appliance_;
   std::string decon_group_name, robot_name, project, rapidsense_data, records;
 
   void SetUp() override {
-    nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_latency_test");
+    nh_.param<std::string>("decon_group_name", decon_group_name,
+                           "ur3_latency_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("project", project, "../../");
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
     nh_.param<std::string>("recordings", records, "../../");
 
     std::string TestPath = std::getenv("RTR_PERCEPTION_TEST_DATA_ROOT");
-    RTR_INFO("Succesfully accessed environment variable RTR_PERCEPTION_TEST_DATA_ROOT: {}",
+    RTR_INFO("Succesfully accessed environment variable "
+             "RTR_PERCEPTION_TEST_DATA_ROOT: {}",
              TestPath);
 
     project = TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3.zip";
-    rapidsense_data = TestPath + "/rapidsense_testdata/ur3_latency_test1/rapidsense_data/";
+    rapidsense_data =
+        TestPath + "/rapidsense_testdata/ur3_latency_test1/rapidsense_data/";
     records = TestPath + "/rapidsense_testdata/ur3_latency_test1/recordings/";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
     // use calibration json for now
     // TODO: replace with one from nas
-    const std::string robot_param = ros::package::getPath("reg_test_calibration_sim")
-                                    + "/../../test_data/ur3_calibration_test/ur3.json";
+    const std::string robot_param =
+        ros::package::getPath("reg_test_calibration_sim") +
+        "/../../test_data/ur3_calibration_test/ur3.json";
     ASSERT_TRUE(appliance_.InstallProject(project));
     ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
     ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
@@ -74,7 +78,8 @@ class LatencyTestFixture : public ::testing::Test {
     if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
       RTR_ERROR("Unable to get state directory from rapidsense");
     } else {
-      RTR_INFO("Got state directory from rapidsense: {}", rapidsense_state_directory);
+      RTR_INFO("Got state directory from rapidsense: {}",
+               rapidsense_state_directory);
     }
 
     std::string rapidsense_data_directory =
@@ -85,23 +90,25 @@ class LatencyTestFixture : public ::testing::Test {
     CopyFolder(rapidsense_data, rapidsense_data_directory);
     CopyFolder(records, recording_directory);
 
-    if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state", ros::Duration(30))) {
+    if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state",
+                                                      ros::Duration(30))) {
       RTR_ERROR("Timed out waiting for appliance");
     }
-    if (!ros::topic::waitForMessage<rtr_msgs::SchemaMessage>("/rapidsense/health",
-                                                             ros::Duration(30))) {
+    if (!ros::topic::waitForMessage<rtr_msgs::SchemaMessage>(
+            "/rapidsense/health", ros::Duration(30))) {
       RTR_ERROR("Timed out waiting for RapidSense server");
     }
   }
   void TearDown() override {}
 
- public:
+public:
   LatencyTestFixture()
-      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI), appliance_(nh_) {}
+      : nh_(""), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI),
+        appliance_(nh_) {}
 };
 
 class LatencyTracker {
- public:
+public:
   std::mutex data_mutex_;
   std::vector<float> x_;
 
@@ -110,7 +117,7 @@ class LatencyTracker {
     x_.push_back(x);
   }
 
-  void GetData(std::vector<float>& x) {
+  void GetData(std::vector<float> &x) {
     std::lock_guard<std::mutex> lock(data_mutex_);
     x = x_;
   }
@@ -124,9 +131,11 @@ class LatencyTracker {
   float GetStdDev() {
     float mean = GetMean();
     std::vector<double> diff(x_.size());
-    std::transform(x_.begin(), x_.end(), diff.begin(), [mean](float y) { return y - mean; });
-    float std_dev =
-        std::sqrt(std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0)) / x_.size();
+    std::transform(x_.begin(), x_.end(), diff.begin(),
+                   [mean](float y) { return y - mean; });
+    float std_dev = std::sqrt(std::inner_product(diff.begin(), diff.end(),
+                                                 diff.begin(), 0.0)) /
+                    x_.size();
     return std_dev;
   }
 };
@@ -144,16 +153,18 @@ TEST_F(LatencyTestFixture, VerifyLatency) {
       std::chrono::high_resolution_clock::now();
   int message = 0;
 
-  boost::function<void(const rtr_msgs::VoxelClusterListConstPtr& vx)> vx_func =
+  boost::function<void(const rtr_msgs::VoxelClusterListConstPtr &vx)> vx_func =
       [&vx_tracker, &last_tracker, &last_time,
-       &message](const rtr_msgs::VoxelClusterListConstPtr& vx) {
+       &message](const rtr_msgs::VoxelClusterListConstPtr &vx) {
         std::chrono::high_resolution_clock::time_point end_time =
             std::chrono::high_resolution_clock::now();
         int64_t ms_diff = std::chrono::duration_cast<std::chrono::milliseconds>(
                               end_time - RosTimeToSystemTime(vx->timestamp))
                               .count();
         int64_t last_diff =
-            std::chrono::duration_cast<std::chrono::milliseconds>(end_time - last_time).count();
+            std::chrono::duration_cast<std::chrono::milliseconds>(end_time -
+                                                                  last_time)
+                .count();
         last_time = RosTimeToSystemTime(vx->timestamp);
 
         RTR_INFO("ms_diff = {}, last_diff = {}", ms_diff, last_diff);
@@ -168,10 +179,11 @@ TEST_F(LatencyTestFixture, VerifyLatency) {
 
   RTR_INFO("Subscribing to VoxelClusterList...");
   ros::Subscriber voxel_sub = nh_.subscribe<rtr_msgs::VoxelClusterList>(
-      fmt::format("/rapidsense/streams/{}/voxels_filt", "ur3"), 1, vx_func, ros::VoidConstPtr(),
-      ros::TransportHints().reliable().tcpNoDelay());
-  std::thread playback_thread = std::thread(
-      [this]() { proxy_.StartPlayback("ur3_latency_test_2020-10-23_15-57-32", 1.0, false); });
+      fmt::format("/rapidsense/streams/{}/voxels_filt", "ur3"), 1, vx_func,
+      ros::VoidConstPtr(), ros::TransportHints().reliable().tcpNoDelay());
+  std::thread playback_thread = std::thread([this]() {
+    proxy_.StartPlayback("ur3_latency_test_2020-10-23_15-57-32", 1.0, false);
+  });
   playback_thread.join();
 
   EXPECT_LT(vx_tracker.GetMean(), ms_diff_mean);
@@ -181,7 +193,7 @@ TEST_F(LatencyTestFixture, VerifyLatency) {
   RTR_INFO("Latency Test Finished!");
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
   QApplication app(argc, argv);
