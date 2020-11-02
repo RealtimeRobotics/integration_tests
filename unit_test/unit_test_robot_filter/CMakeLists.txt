@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(integ_test_sim_sensor)
+project(unit_test_robot_filter)
 
 set(CMAKE_CXX_STANDARD 14)
 # dpkg assumes multiarch and cmake supports it:
@@ -13,8 +13,6 @@ SET(CMAKE_AUTORCC ON)
 
 find_package(catkin REQUIRED COMPONENTS
   rtr_cmake_defs
-  rtr_geometry
-  rtr_perc_calibration
   rtr_perc_spatial
   rtr_test_cmake_defs
   rtr_utils
@@ -37,8 +35,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core)
 
 catkin_package(
   CATKIN_DEPENDS
-    rtr_geometry
-    rtr_perc_calibration
     rtr_perc_spatial
     rtr_utils
   DEPENDS
@@ -72,5 +68,6 @@ include_directories(SYSTEM
 ## Testing ##
 #############
 
-rs_add_gtest(SimSensorTest)
-rs_add_gtest(MeshImageGeneratorTest)
+rs_add_gtest(OpenCLRobotMaskGeneratorTest)
+rs_add_gtest(RobotFilterTest)
+rs_add_gtest(RobotFilterFrameRateTest)

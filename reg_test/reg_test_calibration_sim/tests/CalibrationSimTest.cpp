@@ -75,6 +75,7 @@ class CalibrationTestFixture : public ::testing::Test {
       RTR_ERROR("Unable to get state directory from rapidsense");
     }
 
+    ASSERT_TRUE(appliance_.ClearApplianceDatabase());
     ASSERT_TRUE(appliance_.InstallProject(project));
     ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
     ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
@@ -130,24 +131,8 @@ TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
   // Attach Fiducial
   EXPECT_TRUE(proxy_.AttachFiducialToActiveObserver());
 
-  // Get Hubs (arg)
-  const std::string hub_config_topic = "/GetHubConfig";
-  ros::ServiceClient hub_config_service =
-      nh_.serviceClient<rtr_msgs::GetHubConfig>(hub_config_topic);
-  rtr_msgs::GetHubConfig hub_config_srv;
-  hub_config_srv.request.project_name = active_observer;
-  hub_config_srv.request.hub_name = hub_name;
-  rtr::JointConfiguration joint_config;
-
-  EXPECT_TRUE(hub_config_service.call(hub_config_srv));
-  joint_config = rtr::JointConfiguration(hub_config_srv.response.joint_config);
-
-  // Teleport to Hub
-  std::string teleport_topic = fmt::format("/{}/teleport_robot", active_observer);
-  ros::ServiceClient teleport_service = nh_.serviceClient<rtr_msgs::TeleportRobot>(teleport_topic);
-  rtr_msgs::TeleportRobot teleport_srv;
-  teleport_srv.request.joint_config = joint_config.GetData();
-  EXPECT_TRUE(teleport_service.call(teleport_srv) && teleport_srv.response.is_success);
+  // Teleport to hub
+  EXPECT_TRUE(appliance_.TeleportToHub(active_observer, hub_name));
 
   std::set<std::string> cameras_set = proxy_.GetConnectedSensors();
   std::vector<std::string> uids(cameras_set.begin(), cameras_set.end());

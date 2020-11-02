@@ -1,3 +1,5 @@
+#include <functional>
+
 #include <gtest/gtest.h>
 
 #include <rtr_perc_api/Buffer.hpp>

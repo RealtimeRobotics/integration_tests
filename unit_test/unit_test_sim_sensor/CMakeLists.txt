@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(integ_test_robot_observer)
+project(unit_test_sim_sensor)
 
 set(CMAKE_CXX_STANDARD 14)
 # dpkg assumes multiarch and cmake supports it:
@@ -13,10 +13,9 @@ SET(CMAKE_AUTORCC ON)
 
 find_package(catkin REQUIRED COMPONENTS
   rtr_cmake_defs
-  rtr_control_ros
+  rtr_geometry
+  rtr_perc_calibration
   rtr_perc_spatial
-  rtr_perc_sensors_ros
-  rtr_perc_rapidsense_ros
   rtr_test_cmake_defs
   rtr_utils
 )
@@ -38,10 +37,9 @@ find_package(Qt5 REQUIRED COMPONENTS Core)
 
 catkin_package(
   CATKIN_DEPENDS
-    rtr_control_ros
+    rtr_geometry
+    rtr_perc_calibration
     rtr_perc_spatial
-    rtr_perc_sensors_ros
-    rtr_perc_rapidsense_ros
     rtr_utils
   DEPENDS
     OpenCV
@@ -74,6 +72,5 @@ include_directories(SYSTEM
 ## Testing ##
 #############
 
-rs_add_gtest(RobotProxyTest)
-rs_add_rostest(RosRobotObserverTest)
-rs_add_rostest(RobotObserverManagerTest)
+rs_add_gtest(SimSensorTest)
+rs_add_gtest(MeshImageGeneratorTest)

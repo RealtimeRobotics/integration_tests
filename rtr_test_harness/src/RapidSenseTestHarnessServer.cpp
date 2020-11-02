@@ -1,6 +1,7 @@
 #include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
 
 #include <boost/filesystem.hpp>
+#include <ros/topic.h>
 
 #include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_appliance/Appliance.hpp>
@@ -15,8 +16,6 @@
 
 namespace bfs = boost::filesystem;
 
-// using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
-
 namespace rtr {
 namespace perception {
 
@@ -29,50 +28,28 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::s
   if (!bfs::exists(appl_path, ec) || ec != nullptr) {
     bfs::create_directory(appl_path, ec);
   }
-#if 0
-  // Setup the Appliance application  
-  auto factory = VoxelizerFactory::GetInstance();
-  factory->LoadPlugin("opencl", "librtr_voxelize_plugin_opencl.so.1");
 
-  // Load the configuration stuff
-  ApplianceConfig appl_config_opt;
-    
-  // Create the directory if it doesn't exist
-  const bfs::path appl_path = app_dir + "/appliance_data";
-  boost::system::error_code ec;
-  if (!bfs::exists(appl_path, ec) || ec != nullptr) {
-    bfs::create_directory(appl_path, ec);
-  }
-
-  appliance_ = Appliance::Create(appl_path.string(), appl_config_opt);
-  if (appliance_ == nullptr) {
-    RTR_ERROR("Error initializing appliance!");
-    return false;
-  }
-#endif
   spinner_.start();
 
-#if 0
- // TBD: CPU Affinity is no longer being valued in bringing both together. So this
- // may become an issue.
-
-  RapidSenseServerInit("RapidSenseServer", "args_logs_dir", "conf_logs_dir");
-  rapidsense_ = RapidSenseServer::Create(nh_, rs_dir);
-  if (!rapidsense_->GetStatus().IsSuccess()) {
-    RTR_ERROR("RapidSenseServer failed to initialized. Shutting down");
-    return false;
-  }
-#endif
-
-  // Initialize simulator and advertise service to restart
   simulator_ = SensorSimulator::MakePtr(nh_);
   boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
       [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
-    // this->simulator_->Shutdown();
+    this->simulator_->Shutdown();
     res.success = this->simulator_->Init(true);
     return true;
   };
   restart_sim_ = nh_.advertiseService("/restart_sim", callback);
+
+  if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state", ros::Duration(30))) {
+    RTR_ERROR("Timed out waiting for appliance");
+    return false;
+  }
+
+  if (!ros::topic::waitForMessage<rtr_msgs::SchemaMessage>("/rapidsense/health",
+                                                           ros::Duration(30))) {
+    RTR_ERROR("Timed out waiting for RapidSense server");
+    return false;
+  }
 
   return true;
 }
@@ -104,8 +81,6 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::s
 #endif
 
 void RapidSenseTestHarnessServer::Teardown() {
-  // appliance_.reset();
-  // rapidsense_->Shutdown();
   simulator_->Shutdown();
 }
 

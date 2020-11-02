@@ -1,12 +1,6 @@
 #include "rtr_test_harness/ApplianceTestHelper.hpp"
 
 #include <fstream>
-//#include <rtr_app_layer/RapidPlanProject.hpp>
-//#include <rtr_control_ros/RosController.hpp>
-//#include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
-//#include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
-//#include <rtr_appliance/Appliance.hpp>
-//#include <rtr_utils/Backtrace.hpp>
 
 #include <nlohmann-json/json.hpp>
 
@@ -36,7 +30,8 @@
 
 namespace rtr {
 
-ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh) : nh_(nh) {
+ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
+    : ApplianceCommander("127.0.0.1"), nh_(nh) {
   rtr_msgs::SetEULAAccepted srv;
   srv.request.signature = "unittest";
   CallRosService<rtr_msgs::SetEULAAccepted>(nh_, srv, "/SetEULAAccepted");
@@ -83,6 +78,15 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group
     if (!CallRosService<rtr_msgs::GroupProject>(nh_, msg_add_prj, "/AddProjectToGroup")) {
       return false;
     }
+  }
+
+  // Set voxel region verified
+  rtr_msgs::UpdateGroup update_grp;
+  update_grp.request.group_name = dc_group_name;
+  update_grp.request.json_data = "{\"voxel_region_verified\":1}";
+  if (!CallRosService<rtr_msgs::UpdateGroup>(nh_, update_grp, "/UpdateGroup")
+      && update_grp.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+    return false;
   }
 
   return true;
@@ -151,6 +155,62 @@ bool ApplianceTestHelper::GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_g
   }
 
   return false;
+}
+
+bool ApplianceTestHelper::ClearApplianceDatabase() {
+  rtr_msgs::GetGroupInfo info_srv;
+  if (!CallRosService<rtr_msgs::GetGroupInfo>(nh_, info_srv, "/GetDeconGroupInfo")) {
+    return false;
+  }
+
+  for (const auto& group : info_srv.response.groups) {
+    for (const auto& project : group.projects) {
+      rtr_msgs::GroupProject remove_srv;
+      remove_srv.request.group_name = group.GroupName;
+      remove_srv.request.project_name = project;
+      if (!CallRosService<rtr_msgs::GroupProject>(nh_, remove_srv, "/RemoveProjectFromGroup")
+          || remove_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+        return false;
+      }
+      rtr_msgs::DeleteProject delete_srv;
+      delete_srv.request.project_name = project;
+      if (!CallRosService<rtr_msgs::DeleteProject>(nh_, delete_srv, "/DeleteProject")
+          || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+        return false;
+      }
+    }
+    rtr_msgs::DeconGroup delete_srv;
+    delete_srv.request.group_name = group.GroupName;
+    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, delete_srv, "/DeleteGroup")
+        || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ApplianceTestHelper::TeleportToHub(const std::string& robot_name,
+                                        const std::string& hub_name) {
+  ros::ServiceClient hub_config_service =
+      nh_.serviceClient<rtr_msgs::GetHubConfig>("/GetHubConfig");
+  rtr_msgs::GetHubConfig hub_config_srv;
+  hub_config_srv.request.project_name = robot_name;
+  hub_config_srv.request.hub_name = hub_name;
+  rtr::JointConfiguration joint_config;
+
+  if (!hub_config_service.call(hub_config_srv)) {
+    RTR_ERROR("Failed to call /GetHubConfig service");
+    return false;
+  }
+  joint_config = rtr::JointConfiguration(hub_config_srv.response.joint_config);
+
+  // Teleport to Hub
+  const std::string teleport_topic = fmt::format("/{}/teleport_robot", robot_name);
+  ros::ServiceClient teleport_service = nh_.serviceClient<rtr_msgs::TeleportRobot>(teleport_topic);
+  rtr_msgs::TeleportRobot teleport_srv;
+  teleport_srv.request.joint_config = joint_config.GetData();
+
+  return teleport_service.call(teleport_srv) && teleport_srv.response.is_success;
 }
 
 }  // namespace rtr

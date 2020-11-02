@@ -2,19 +2,14 @@
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <ros/node_handle.h>
 #include <ros/ros.h>
 #include <ros/service.h>
-//#include <QApplication>
-#include <gtest/gtest.h>
 
-//#include <rtr_perc_sensors/SensorCalibrationData.hpp>
-#include <rtr_utils/Logging.hpp>
-
-//#include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
-//#include <rtr_appliance/Appliance.hpp>
-//#include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
+#include <rtr_appliance/ApplianceCommander.hpp>
 #include <rtr_msgs/DeconGroupInfo.h>
+#include <rtr_utils/Logging.hpp>
 
 namespace rtr {
 
@@ -40,7 +35,7 @@ bool CallRosService(ros::NodeHandle& nh, MessageType& srv, const std::string& se
 }
 
 // @brief Class to help setup the appliance, as would a rtr customer
-class ApplianceTestHelper {
+class ApplianceTestHelper : public ApplianceCommander {
  public:
   ApplianceTestHelper(ros::NodeHandle& nh);
 
@@ -70,6 +65,12 @@ class ApplianceTestHelper {
 
   // @brief Get info about the deconfliction group loaded on the appliance
   bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group);
+
+  // @brief Clear entire appliance database
+  bool ClearApplianceDatabase();
+
+  // @brief Teleport to hub
+  bool TeleportToHub(const std::string& robot_name, const std::string& hub_name);
 
  protected:
   ros::NodeHandle nh_;

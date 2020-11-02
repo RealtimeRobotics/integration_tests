@@ -36,22 +36,29 @@ run_perc_tests() {
     get_test_packages packages
     echo "Running tests from the following packages: ${packages}"
     if [ "${disable_flakes}" -eq 1 ]; then
-        env DISABLE_RS_FLAKYTESTS=1 catkin run_tests --no-deps ${packages}
+        # run tests one at a time, because currently not dealing with state directories properly for parallel ops
+        # TODO: fix this so we can run in parallel
+        env DISABLE_RS_FLAKYTESTS=1 catkin run_tests --no-deps ${packages} -j1
     else
-        env -u DISABLE_RS_FLAKYTESTS catkin run_tests --no-deps ${packages}
+        # run the flaky tests one at a time
+        env -u DISABLE_RS_FLAKYTESTS catkin run_tests --no-deps ${packages} -j1
     fi
 }
 
 show_perc_results() {
     get_test_packages packages
     get_build_dir build_dir
-    echo "showing tests from the following packages: ${packages} and ${build_dir}"
+    echo "Showing tests from the following packages: ${packages} and ${build_dir}"
     echo "\n\nTEST RESULTS\n------------------------------------------------------------------"
-    local results_dirs="${build_dir}$(echo ${packages} | sed "s| | ${build_dir}|g")"
-    for result_dir in ${results_dirs}
+
+    # catkin_test_results requires install to be sourced
+    local root_dir=$(catkin locate)
+    . ${root_dir}/install/setup.sh
+
+    for result_dir in ${packages}
     do
         echo $result_dir
-        catkin_test_results --all --verbose ${result_dir}
+        catkin_test_results --all --verbose ${build_dir}${result_dir}
         echo ""
     done
 }
@@ -59,13 +66,17 @@ show_perc_results() {
 show_perc_results_summary() {
     get_test_packages packages
     get_build_dir build_dir
-    local results_dirs="${build_dir}$(echo ${packages} | sed "s| | ${build_dir}|g")"
+
+    # catkin_test_results requires install to be sourced
+    local root_dir=$(catkin locate)
+    . ${root_dir}/install/setup.sh
+
     echo "TEST RESULT SUMMARY"
     echo "-------------------"
-    for result_dir in ${results_dirs}
+    for result_dir in ${packages}
     do
         echo $result_dir
-        catkin_test_results --all ${result_dir}
+        catkin_test_results --all ${build_dir}${result_dir}
         echo ""
     done
 }
