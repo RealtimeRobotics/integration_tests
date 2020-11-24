@@ -9,7 +9,7 @@
       args="--runtime-dir=$(arg rs_dir) --state-dir=$(arg rs_dir) --cache_dir=$(arg rs_dir) --config-dir=$(arg rs_dir) --logs-dir=$(arg rs_dir)/">
   </node>
 
-  <test test-name="CalibrationRobotTest" pkg="reg_test_calibration" type="CalibrationRobotTest" time-limit="400">
+  <test test-name="CalibrationRobotTest" pkg="reg_test_calibration" type="CalibrationRobotTest" time-limit="600">
     <param name="project" type="string" value="$(find reg_test_calibration)/../../test_data/melcobot_calibration_test/melcobot.zip" />
     <param name="rapidsense_data" type="string" value="$(find reg_test_calibration)/../../test_data/melcobot_calibration_test/rapidsense_data/" />
     <param name="robot_name"  type="string" value="melcobot"/>
