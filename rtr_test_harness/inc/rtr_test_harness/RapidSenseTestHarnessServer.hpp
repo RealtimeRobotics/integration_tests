@@ -29,11 +29,23 @@ class RapidSenseTestHarnessServer {
  public:
   RapidSenseTestHarnessServer();
 
-  bool SetUp(const std::string& app_dir, const std::string& rs_dir);
-  bool SetUpSim(const std::string& app_dir, const std::string& rs_dir);
+  // @brief Setup applinace & rapidsense server
+  bool SetUp(const std::string& app_dir);
+
+  // @brief Setup applinace & rapidsense server with simulated sensors
+  bool SetUpSim(const std::string& app_dir);
+
+  // @brief Start appliance server
+  bool StartServer(const std::string& app_dir);
+
+  // @brief Start simulated sensors
+  bool StartSensorSimulator();
+
+  // @brief Check state of appliance & rapidsense
+  bool CheckServerHealth();
+
+  // @brief Cleanup appliance & rapidsense server
   void Teardown();
-  // bool SetupDeconflictionGroup(const std::string& project, const std::string&
-  // DC_group);
 
  private:
   ros::NodeHandle nh_;

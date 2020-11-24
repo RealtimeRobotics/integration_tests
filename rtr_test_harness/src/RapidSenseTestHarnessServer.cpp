@@ -21,7 +21,15 @@ namespace perception {
 
 RapidSenseTestHarnessServer::RapidSenseTestHarnessServer() : nh_("~"), spinner_(10) {}
 
-bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::string&) {
+bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir) {
+  return StartServer(app_dir) && CheckServerHealth();
+}
+
+bool RapidSenseTestHarnessServer::SetUpSim(const std::string& app_dir) {
+  return StartServer(app_dir) && StartSensorSimulator() && CheckServerHealth();
+}
+
+bool RapidSenseTestHarnessServer::StartServer(const std::string& app_dir) {
   InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
   const bfs::path appl_path = app_dir + "/appliance_data";
   boost::system::error_code ec;
@@ -30,31 +38,10 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::s
   }
 
   spinner_.start();
-
-  if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state", ros::Duration(30))) {
-    RTR_ERROR("Timed out waiting for appliance");
-    return false;
-  }
-
-  if (!ros::topic::waitForMessage<rtr_msgs::SchemaMessage>("/rapidsense/health",
-                                                           ros::Duration(30))) {
-    RTR_ERROR("Timed out waiting for RapidSense server");
-    return false;
-  }
-
   return true;
 }
 
-bool RapidSenseTestHarnessServer::SetUpSim(const std::string& app_dir, const std::string&) {
-  InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
-  const bfs::path appl_path = app_dir + "/appliance_data";
-  boost::system::error_code ec;
-  if (!bfs::exists(appl_path, ec) || ec != nullptr) {
-    bfs::create_directory(appl_path, ec);
-  }
-
-  spinner_.start();
-
+bool RapidSenseTestHarnessServer::StartSensorSimulator() {
   simulator_ = SensorSimulator::MakePtr(nh_);
   boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
       [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
@@ -63,7 +50,11 @@ bool RapidSenseTestHarnessServer::SetUpSim(const std::string& app_dir, const std
     return true;
   };
   restart_sim_ = nh_.advertiseService("/restart_sim", callback);
+  return true;
+}
 
+bool RapidSenseTestHarnessServer::CheckServerHealth() {
+  simulator_ = SensorSimulator::MakePtr(nh_);
   if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state", ros::Duration(30))) {
     RTR_ERROR("Timed out waiting for appliance");
     return false;
@@ -77,6 +68,7 @@ bool RapidSenseTestHarnessServer::SetUpSim(const std::string& app_dir, const std
 
   return true;
 }
+
 #if 0
   bool RapidSenseTestHarnessServer::SetupDeconflictionGroup(const std::string& project, const std::string& DC_group) {
 
