@@ -1,0 +1,32 @@
+{
+  "connection_type": 0,
+  "robot_params":
+  {
+    "bool_params":
+    {
+        "enable_servos_on_load":true
+    },
+    "double_params":{
+
+    },
+    "float_params":
+    {
+        "max_tool_speed":10.0
+    },
+    "int_params":{},
+    "string_params":
+    {
+        "computer_ip_address":"192.168.1.35",
+        "robot_address":"192.168.1.90",
+        "sim_ip_address":"127.0.0.1"
+    },
+    "uint_params":
+    {
+        "datalink_port":10002,
+        "mxt_port":10000,
+        "shortcut_type":0,
+        "sim_command_port":30003,
+        "sim_data_port":30004
+    }
+  }
+}

@@ -1,0 +1,3 @@
+robot: alphabot
+flange: alphabot_rtr_flange
+hub: h2
