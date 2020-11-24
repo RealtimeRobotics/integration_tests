@@ -1,0 +1,19 @@
+<launch>
+  <arg name="rp_dir" value="/tmp/appliance_test" />
+  <node pkg="rtr_appliance_app" name="rtr_appliance_app" type="rtr_appliance_app" cwd="node"
+    args="--runtime-dir=$(arg rp_dir) --state-dir=$(arg rp_dir) --cache_dir=$(arg rp_dir) --config-dir=$(arg rp_dir) --logs-dir=$(arg rp_dir)/" >
+  </node>
+
+  <arg name="rs_dir" value="/tmp/rapidsense_test" />
+  <node pkg="rtr_spatial_perception" name="rtr_spatial_perception" type="rtr_spatial_perception" cwd="node"
+      args="--runtime-dir=$(arg rs_dir) --state-dir=$(arg rs_dir) --cache_dir=$(arg rs_dir) --config-dir=$(arg rs_dir) --logs-dir=$(arg rs_dir)/">
+  </node>
+
+  <test test-name="CalibrationRobotTest" pkg="reg_test_calibration" type="CalibrationRobotTest" time-limit="400">
+    <param name="project" type="string" value="$(find reg_test_calibration)/../../test_data/melcobot_calibration_test/melcobot.zip" />
+    <param name="rapidsense_data" type="string" value="$(find reg_test_calibration)/../../test_data/melcobot_calibration_test/rapidsense_data/" />
+    <param name="robot_name"  type="string" value="melcobot"/>
+    <param name="flange_frame"  type="string" value="rtr_flange"/>
+    <param name="hub_name"  type="string" value="h3"/>
+  </test>
+</launch>
