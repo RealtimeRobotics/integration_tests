@@ -11,7 +11,7 @@
 
 
   <test test-name="RecordPlaybackSimTest" pkg="reg_test_record_playback" type="RecordPlaybackSimTest" time-limit="600">
-    <param name="project" type="string" value="$(find reg_test_record_playback)/../../test_data/ur3_calibration_test/ur3.zip" />
+    <param name="project" type="string" value="$(find reg_test_record_playback)/../../test_data/ur3_calibration_test/ur3_november_25.zip" />
     <param name="rapidsense_data" type="string" value="$(find reg_test_record_playback)/../../test_data/ur3_calibration_test/rapidsense_data/" />
     <param name="robot_name"  type="string" value="ur3"/>
   </test>

@@ -10,7 +10,7 @@
   </node>
 
   <test test-name="RuntimeSimTest" pkg="integ_test_runtime_sim" type="RuntimeSimTest" time-limit="600">
-    <param name="project" type="string" value="$(find integ_test_runtime_sim)/../../test_data/ur3_runtime_test/ur3.zip" />
+    <param name="project" type="string" value="$(find integ_test_runtime_sim)/../../test_data/ur3_runtime_test/ur3_november_25.zip" />
     <param name="rapidsense_data" type="string" value="$(find integ_test_runtime_sim)/../../test_data/ur3_runtime_test/rapidsense_data/" />
     <param name="decon_group_name" type="string" value="ur3_runtime_test"/>
     <param name="robot_name" type="string" value="ur3"/>

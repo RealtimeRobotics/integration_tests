@@ -56,18 +56,16 @@ protected:
              "RTR_PERCEPTION_TEST_DATA_ROOT: {}",
              TestPath);
 
-    project = TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3.zip";
+    project =
+        TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3_november_25.zip";
     rapidsense_data =
         TestPath + "/rapidsense_testdata/ur3_latency_test1/rapidsense_data/";
     records = TestPath + "/rapidsense_testdata/ur3_latency_test1/recordings/";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
-    // use calibration json for now
-    // TODO: replace with one from nas
-    const std::string robot_param =
-        ros::package::getPath("reg_test_calibration_sim") +
-        "/../../test_data/ur3_calibration_test/ur3.json";
+    std::string robot_param =
+        TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3.json";
     ASSERT_TRUE(appliance_.InstallProject(project));
     ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
     ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));

@@ -63,7 +63,7 @@ protected:
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
 
     project = ros::package::getPath("reg_test_record_playback") +
-              "/../../test_data/ur3_calibration_test/ur3.zip";
+              "/../../test_data/ur3_calibration_test/ur3_november_25.zip";
     rapidsense_data = ros::package::getPath("reg_test_record_playback") +
                       "/../../test_data/ur3_calibration_test/rapidsense_data/";
     robot_param = ros::package::getPath("reg_test_record_playback") +

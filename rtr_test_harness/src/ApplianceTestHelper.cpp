@@ -30,7 +30,7 @@
 
 namespace rtr {
 
-ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
+ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle &nh)
     : ApplianceCommander("127.0.0.1"), nh_(nh) {
   rtr_msgs::SetEULAAccepted srv;
   srv.request.signature = "unittest";
@@ -88,8 +88,8 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(
   rtr_msgs::UpdateGroup update_grp;
   update_grp.request.group_name = dc_group_name;
   update_grp.request.json_data = "{\"voxel_region_verified\":1}";
-  if (!CallRosService<rtr_msgs::UpdateGroup>(nh_, update_grp, "/UpdateGroup")
-      && update_grp.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+  if (!CallRosService<rtr_msgs::UpdateGroup>(nh_, update_grp, "/UpdateGroup") &&
+      update_grp.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
     return false;
   }
 
@@ -131,16 +131,22 @@ bool ApplianceTestHelper::UnloadGroup(const std::string &dc_group_name) {
 
 bool ApplianceTestHelper::SetProjectRobotParam(
     const std::string &prj_name, const std::string &param_json_path) {
-  // take the robot_param json file and create a json obj
-  std::ifstream ifs(param_json_path);
-  nlohmann::json j = nlohmann::json::parse(ifs);
+  try {
+    // take the robot_param json file and create a json obj
+    std::ifstream ifs(param_json_path);
+    nlohmann::json j = nlohmann::json::parse(ifs);
 
-  // Update Project Info
-  rtr_msgs::UpdateProject srv;
-  srv.request.project_name = prj_name;
-  srv.request.json_data = j.dump();
-  if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject") ||
-      srv.response.result_code != 0) {
+    // Update Project Info
+    rtr_msgs::UpdateProject srv;
+    srv.request.project_name = prj_name;
+    srv.request.json_data = j.dump();
+    if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject") ||
+        srv.response.result_code != 0) {
+      return false;
+    }
+  } catch (std::exception &e) {
+    RTR_ERROR("Caught exception when calling SetProjectRobotParam: {}",
+              e.what());
     return false;
   }
 
@@ -166,38 +172,42 @@ bool ApplianceTestHelper::GetLoadedDeconGroup(
 
 bool ApplianceTestHelper::ClearApplianceDatabase() {
   rtr_msgs::GetGroupInfo info_srv;
-  if (!CallRosService<rtr_msgs::GetGroupInfo>(nh_, info_srv, "/GetDeconGroupInfo")) {
+  if (!CallRosService<rtr_msgs::GetGroupInfo>(nh_, info_srv,
+                                              "/GetDeconGroupInfo")) {
     return false;
   }
 
-  for (const auto& group : info_srv.response.groups) {
-    for (const auto& project : group.projects) {
+  for (const auto &group : info_srv.response.groups) {
+    for (const auto &project : group.projects) {
       rtr_msgs::GroupProject remove_srv;
       remove_srv.request.group_name = group.GroupName;
       remove_srv.request.project_name = project;
-      if (!CallRosService<rtr_msgs::GroupProject>(nh_, remove_srv, "/RemoveProjectFromGroup")
-          || remove_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+      if (!CallRosService<rtr_msgs::GroupProject>(nh_, remove_srv,
+                                                  "/RemoveProjectFromGroup") ||
+          remove_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
         return false;
       }
       rtr_msgs::DeleteProject delete_srv;
       delete_srv.request.project_name = project;
-      if (!CallRosService<rtr_msgs::DeleteProject>(nh_, delete_srv, "/DeleteProject")
-          || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+      if (!CallRosService<rtr_msgs::DeleteProject>(nh_, delete_srv,
+                                                   "/DeleteProject") ||
+          delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
         return false;
       }
     }
     rtr_msgs::DeconGroup delete_srv;
     delete_srv.request.group_name = group.GroupName;
-    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, delete_srv, "/DeleteGroup")
-        || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, delete_srv,
+                                              "/DeleteGroup") ||
+        delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
       return false;
     }
   }
   return true;
 }
 
-bool ApplianceTestHelper::TeleportToHub(const std::string& robot_name,
-                                        const std::string& hub_name) {
+bool ApplianceTestHelper::TeleportToHub(const std::string &robot_name,
+                                        const std::string &hub_name) {
   ros::ServiceClient hub_config_service =
       nh_.serviceClient<rtr_msgs::GetHubConfig>("/GetHubConfig");
   rtr_msgs::GetHubConfig hub_config_srv;
@@ -212,13 +222,15 @@ bool ApplianceTestHelper::TeleportToHub(const std::string& robot_name,
   joint_config = rtr::JointConfiguration(hub_config_srv.response.joint_config);
 
   // Teleport to Hub
-  const std::string teleport_topic = fmt::format("/{}/teleport_robot", robot_name);
-  ros::ServiceClient teleport_service = nh_.serviceClient<rtr_msgs::TeleportRobot>(teleport_topic);
+  const std::string teleport_topic =
+      fmt::format("/{}/teleport_robot", robot_name);
+  ros::ServiceClient teleport_service =
+      nh_.serviceClient<rtr_msgs::TeleportRobot>(teleport_topic);
   rtr_msgs::TeleportRobot teleport_srv;
   teleport_srv.request.joint_config = joint_config.GetData();
 
-  return teleport_service.call(teleport_srv) && teleport_srv.response.is_success;
+  return teleport_service.call(teleport_srv) &&
+         teleport_srv.response.is_success;
 }
 
-}  // namespace rtr
-
+} // namespace rtr

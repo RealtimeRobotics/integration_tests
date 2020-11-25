@@ -37,8 +37,8 @@ bool CallRosService(ros::NodeHandle &nh, MessageType &srv,
 
 // @brief Class to help setup the appliance, as would a rtr customer
 class ApplianceTestHelper : public ApplianceCommander {
- public:
-  ApplianceTestHelper(ros::NodeHandle& nh);
+public:
+  ApplianceTestHelper(ros::NodeHandle &nh);
 
   // @brief Install the project zip to appliance
   bool InstallProject(const std::string &project_zip);
@@ -68,17 +68,14 @@ class ApplianceTestHelper : public ApplianceCommander {
   // @brief Get info about the deconfliction group loaded on the appliance
   bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group);
 
-<<<<<<< HEAD
   // @brief Clear entire appliance database
   bool ClearApplianceDatabase();
 
   // @brief Teleport to hub
-  bool TeleportToHub(const std::string& robot_name, const std::string& hub_name);
+  bool TeleportToHub(const std::string &robot_name,
+                     const std::string &hub_name);
 
- protected:
-=======
 protected:
->>>>>>> ~format~
   ros::NodeHandle nh_;
 };
 
