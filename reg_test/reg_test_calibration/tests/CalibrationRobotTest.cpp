@@ -159,6 +159,6 @@ TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
   // Consider disabling.
   EXPECT_TRUE(proxy_.SetConfigureMode());
   AllSensorData post_calibration_data = proxy_.GetCalibration();
-  EXPECT_TRUE(pre_calibration_data.FuzzyEquals(post_calibration_data, .025f));
+  EXPECT_TRUE(pre_calibration_data.FuzzyEquals(post_calibration_data, .04f));
   RTR_INFO("Calibration Test Successful!");
 }
