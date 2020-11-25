@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <QApplication>
+
 #include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
 #include <ros/package.h>
@@ -26,7 +27,7 @@ using namespace rtr;
 
 namespace bfs = boost::filesystem;
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   bfs::remove_all("/tmp/appliance_test");
   bfs::remove_all("/tmp/rapidsense_test");
   QApplication app(argc, argv);
@@ -34,8 +35,7 @@ int main(int argc, char **argv) {
 
   ros::init(argc, argv, "RecordPlaybackSimTest");
   RapidSenseTestHarnessServer server;
-  std::string rs_path =
-      ros::package::getPath("reg_test_record_playback") + "/../../test_data";
+  std::string rs_path = ros::package::getPath("reg_test_record_playback") + "/../../test_data";
   server.SetUp("appliance_test", rs_path);
 
   ::testing::InitGoogleTest(&argc, argv);
@@ -47,27 +47,24 @@ int main(int argc, char **argv) {
 }
 
 class RapidSenseTestFixture : public ::testing::Test {
-
-protected:
+ protected:
   ros::NodeHandle nh_;
   RapidSenseTestHelper appliance_;
   RapidSenseFrontEndProxy proxy_;
-  std::string decon_group_name, robot_name, project, rapidsense_data,
-      robot_param;
+  std::string decon_group_name, robot_name, project, rapidsense_data, robot_param;
 
   void SetUp() override {
-    nh_.param<std::string>("decon_group_name", decon_group_name,
-                           "ur3_calibration_test");
+    nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("project", project, "../../");
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
 
-    project = ros::package::getPath("reg_test_record_playback") +
-              "/../../test_data/ur3_calibration_test/ur3_november_25.zip";
-    rapidsense_data = ros::package::getPath("reg_test_record_playback") +
-                      "/../../test_data/ur3_calibration_test/rapidsense_data/";
-    robot_param = ros::package::getPath("reg_test_record_playback") +
-                  "/../../test_data/ur3_calibration_test/ur3.json";
+    project = ros::package::getPath("reg_test_record_playback")
+              + "/../../test_data/ur3_calibration_test/ur3_november_25.zip";
+    rapidsense_data = ros::package::getPath("reg_test_record_playback")
+                      + "/../../test_data/ur3_calibration_test/rapidsense_data/";
+    robot_param = ros::package::getPath("reg_test_record_playback")
+                  + "/../../test_data/ur3_calibration_test/ur3.json";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
@@ -93,20 +90,17 @@ protected:
     std::this_thread::sleep_for(std::chrono::seconds(4));
   }
 
-public:
+ public:
   RapidSenseTestFixture()
-      : nh_(""), appliance_(nh_),
-        proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {}
-  RapidSenseTestFixture(ros::NodeHandle &nh)
-      : nh_(nh), appliance_(nh_),
-        proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {
+      : nh_(""), appliance_(nh_), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {}
+  RapidSenseTestFixture(ros::NodeHandle& nh)
+      : nh_(nh), appliance_(nh_), proxy_(RapidSenseFrontEndProxy::ProxyHost::RAPIDSENSE_GUI) {
     // Start our proxy_ as the Rapidsense gui so the server doesn't
     // automatically try to transition while we are testing
   }
 };
 
 TEST_F(RapidSenseTestFixture, RecordPlaybackTest) {
-
   EXPECT_EQ(proxy_.GetHealth().input_mode, RapidSenseInputMode::SIMULATION);
   if (proxy_.GetState() != RapidSenseState::OPERATION) {
     EXPECT_TRUE(proxy_.SetOperationMode());
@@ -114,11 +108,9 @@ TEST_F(RapidSenseTestFixture, RecordPlaybackTest) {
 
   rtr::perception::SensorFrame::ConstPtr imgin;
   rtr::perception::SensorFrameType frame_type =
-      SensorFrameType(SensorFrameType::SENSOR_FRAME_VOXELS,
-                      SensorFrameType::ROBOT_SELF_FILTERED);
+      SensorFrameType(SensorFrameType::SENSOR_FRAME_VOXELS, SensorFrameType::ROBOT_SELF_FILTERED);
   imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
-  SensorFrameVoxels::ConstPtr voxel_ptr =
-      SensorFrameVoxels::CastConstPtr(imgin);
+  SensorFrameVoxels::ConstPtr voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
   std::vector<Voxel> voxels;
   voxel_ptr->GetVoxels(voxels);
   EXPECT_TRUE(!voxels.empty());

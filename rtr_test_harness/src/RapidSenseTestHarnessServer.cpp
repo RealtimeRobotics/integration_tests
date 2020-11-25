@@ -19,11 +19,9 @@ namespace bfs = boost::filesystem;
 namespace rtr {
 namespace perception {
 
-RapidSenseTestHarnessServer::RapidSenseTestHarnessServer()
-    : nh_("~"), spinner_(10) {}
+RapidSenseTestHarnessServer::RapidSenseTestHarnessServer() : nh_("~"), spinner_(10) {}
 
-bool RapidSenseTestHarnessServer::SetUp(const std::string &app_dir,
-                                        const std::string &) {
+bool RapidSenseTestHarnessServer::SetUp(const std::string& app_dir, const std::string&) {
   InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
   const bfs::path appl_path = app_dir + "/appliance_data";
   boost::system::error_code ec;
@@ -34,10 +32,8 @@ bool RapidSenseTestHarnessServer::SetUp(const std::string &app_dir,
   spinner_.start();
 
   simulator_ = SensorSimulator::MakePtr(nh_);
-  boost::function<bool(std_srvs::Trigger::Request &,
-                       std_srvs::Trigger::Response &)>
-      callback = [this](std_srvs::Trigger::Request &,
-                        std_srvs::Trigger::Response &res) -> bool {
+  boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
+      [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
     this->simulator_->Shutdown();
     res.success = this->simulator_->Init(true);
     return true;
@@ -88,5 +84,5 @@ void RapidSenseTestHarnessServer::Teardown() {
   simulator_->Shutdown();
 }
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr

@@ -6,7 +6,7 @@
 using namespace rtr;
 using namespace rtr::perception;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   rtr::InitializeLogging("rapidsense_benchmarker");
   ros::init(argc, argv, "rapidsense_benchmarker");
 

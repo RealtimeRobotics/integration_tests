@@ -1,0 +1,9 @@
+---
+Checks:  '-*,
+         bugprone-*,
+         performance-*,
+         readability-*,
+         -readability-braces-around-statements,
+         '
+FormatStyle: file
+...

@@ -15,8 +15,7 @@ namespace rtr {
 
 //! @brief call ros service and check response
 template <typename MessageType>
-bool CallRosService(ros::NodeHandle &nh, MessageType &srv,
-                    const std::string &serv) {
+bool CallRosService(ros::NodeHandle& nh, MessageType& srv, const std::string& serv) {
   // TODO: We need a timeout on watiForService, but uncertain of how this
   // can be done without hardcoding
   if (!ros::service::waitForService(serv)) {
@@ -37,46 +36,44 @@ bool CallRosService(ros::NodeHandle &nh, MessageType &srv,
 
 // @brief Class to help setup the appliance, as would a rtr customer
 class ApplianceTestHelper : public ApplianceCommander {
-public:
-  ApplianceTestHelper(ros::NodeHandle &nh);
+ public:
+  ApplianceTestHelper(ros::NodeHandle& nh);
 
   // @brief Install the project zip to appliance
-  bool InstallProject(const std::string &project_zip);
+  bool InstallProject(const std::string& project_zip);
 
   // @brief Get a list of projects currently installed onto the appliance
-  bool GetInstalledProjects(std::vector<std::string> &projects);
+  bool GetInstalledProjects(std::vector<std::string>& projects);
 
   // @brief Create a decon group, and add all installed projects to that group
-  bool AddAllProjectsToDeconGroup(const std::string &dc_group_name);
+  bool AddAllProjectsToDeconGroup(const std::string& dc_group_name);
 
   // @brief Set appliance deconfliction group to run with rapidsense enabled
-  bool SetVisionEnabled(const std::string &dc_group_name, bool is_enabled);
+  bool SetVisionEnabled(const std::string& dc_group_name, bool is_enabled);
 
   // @brief Load appliance with deconfliction group as per user-guide
-  bool LoadGroup(const std::string &dc_group_name);
+  bool LoadGroup(const std::string& dc_group_name);
 
   // @brief Unload deconfliction group from the appliance
-  bool UnloadGroup(const std::string &dc_group_name);
+  bool UnloadGroup(const std::string& dc_group_name);
 
   /**
    * @brief take a json file and set that as the robot_params for the
    * appliance project via ros services
    */
-  bool SetProjectRobotParam(const std::string &prj_name,
-                            const std::string &param_json_path);
+  bool SetProjectRobotParam(const std::string& prj_name, const std::string& param_json_path);
 
   // @brief Get info about the deconfliction group loaded on the appliance
-  bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group);
+  bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group);
 
   // @brief Clear entire appliance database
   bool ClearApplianceDatabase();
 
   // @brief Teleport to hub
-  bool TeleportToHub(const std::string &robot_name,
-                     const std::string &hub_name);
+  bool TeleportToHub(const std::string& robot_name, const std::string& hub_name);
 
-protected:
+ protected:
   ros::NodeHandle nh_;
 };
 
-} // namespace rtr
+}  // namespace rtr

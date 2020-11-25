@@ -45,21 +45,21 @@ struct RapidSenseTestConfig : public SchemaBase {
 class RapidSenseTestResult {
   DEFINE_SMART_PTR(RapidSenseTestResult)
 
-public:
+ public:
   typedef Benchmarker::VoxelMetrics Metrics;
   typedef Benchmarker::Metrics::Statistic Statistic;
   typedef std::map<Statistic, float> StatSet;
 
   enum Result { SUCCESS, CRITERIA_FAILURE, OPERATION_FAILURE, PATH_FAILURE };
 
-  RapidSenseTestResult(const std::string &name);
+  RapidSenseTestResult(const std::string& name);
 
-  void Update(const BenchmarkManager::MetricFrame &frame);
-  void ComputeFinalResults(const RapidSenseTestConfig &test_config);
+  void Update(const BenchmarkManager::MetricFrame& frame);
+  void ComputeFinalResults(const RapidSenseTestConfig& test_config);
   void Print();
   std::string CSVString();
 
-  static std::string TestResultToString(const Result &res);
+  static std::string TestResultToString(const Result& res);
 
   std::string name_;
   bool test_robot_filter_;
@@ -71,7 +71,7 @@ public:
   std::vector<BenchmarkManager::MetricFrame> frames_;
 };
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr
 
-#endif // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETESTCONFIGS_HPP_
+#endif  // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETESTCONFIGS_HPP_

@@ -18,8 +18,7 @@ RapidSenseRobotConfig CreateRobotConfig(const RapidPlanProject::Ptr prj) {
   RapidSenseRobotConfig config;
   config.name = prj->GetName();
   config.safe_name = GetROSSafeTopicPrefix(prj->GetName(), prj->GetId());
-  RosController::TopicNames names =
-      RosController::GetTopicNames(config.safe_name);
+  RosController::TopicNames names = RosController::GetTopicNames(config.safe_name);
   config.joint_topic = names.joint_states;
   config.status_topic = names.robot_status;
   config.joint_path_topic = names.follow_joint_path;
@@ -34,18 +33,15 @@ RapidSenseRobotConfig CreateRobotConfig(const RapidPlanProject::Ptr prj) {
 void InitRosRobotObserver(ros::NodeHandle& nh, const RapidPlanProject::Ptr project,
                           const RobotObserver::Ptr observer, const RapidSenseRobotConfig& config) {
   // Create publishers
-  ros::Publisher joint_pub =
-      nh.advertise<sensor_msgs::JointState>(config.joint_topic, 1);
-  ros::Publisher status_pub =
-      nh.advertise<rtr_control_ros::RobotStatus>(config.status_topic, 1);
+  ros::Publisher joint_pub = nh.advertise<sensor_msgs::JointState>(config.joint_topic, 1);
+  ros::Publisher status_pub = nh.advertise<rtr_control_ros::RobotStatus>(config.status_topic, 1);
 
   // Allow the RobotObserver to initialize
   std::atomic_bool cancel(false);
   std::thread publish_thread([&]() {
     while (!cancel) {
       joint_pub.publish(CreateJointStateMessage(Vec(6, 0.f)));
-      status_pub.publish(CreateRobotStatusMessage(
-          RobotManagerInterface::State::CONNECTED, ""));
+      status_pub.publish(CreateRobotStatusMessage(RobotManagerInterface::State::CONNECTED, ""));
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   });
@@ -73,8 +69,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
   InitRosRobotObserver(nh, project, observer, config);
 
   //// Test joint states
-  ros::Publisher joint_pub =
-      nh.advertise<sensor_msgs::JointState>(config.joint_topic, 1);
+  ros::Publisher joint_pub = nh.advertise<sensor_msgs::JointState>(config.joint_topic, 1);
 
   // refresh spinner until at current joint config
   JointConfiguration test_config(6, 1.f);
@@ -84,17 +79,16 @@ TEST(RosRobotObserverTest, ROSTopics) {
   }
 
   JointConfiguration previous_config = test_config;
-  for (const auto &config : testutils::MELCO_JOINTS) {
+  for (const auto& config : testutils::MELCO_JOINTS) {
     // publish joint states
     sensor_msgs::JointState joint_msg = CreateJointStateMessage(config);
     joint_pub.publish(joint_msg);
 
     // check that the are received and returned properly
-    JointConfiguration current_config = observer->GetJointConfiguration(
-        RosTimeToSystemTime(joint_msg.header.stamp));
+    JointConfiguration current_config =
+        observer->GetJointConfiguration(RosTimeToSystemTime(joint_msg.header.stamp));
     while (current_config.FuzzyEquals(previous_config)) {
-      current_config = observer->GetJointConfiguration(
-          RosTimeToSystemTime(joint_msg.header.stamp));
+      current_config = observer->GetJointConfiguration(RosTimeToSystemTime(joint_msg.header.stamp));
       ros::spinOnce();
     }
     EXPECT_TRUE(current_config.FuzzyEquals(config));
@@ -102,8 +96,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
   }
 
   //// Test robot status
-  ros::Publisher status_pub =
-      nh.advertise<rtr_control_ros::RobotStatus>(config.status_topic, 1);
+  ros::Publisher status_pub = nh.advertise<rtr_control_ros::RobotStatus>(config.status_topic, 1);
 
   // refresh spinner until at current joint config
   rtr_control_ros::RobotStatus status_msg1 =
@@ -125,15 +118,14 @@ TEST(RosRobotObserverTest, ROSTopics) {
   EXPECT_EQ(status_msg2.state, observer->GetRobotStatus());
 
   // check that the status callback functionality works
-  rtr_control_ros::RobotStatus status_msg3 = CreateRobotStatusMessage(
-      RobotManagerInterface::State::ERROR, "state string");
-  observer->AddRobotStatusChangedCallback([&](const int old_status,
-                                              const int current_status,
-                                              const std::string &state_str) {
-    EXPECT_EQ(old_status, status_msg2.state);
-    EXPECT_EQ(current_status, status_msg3.state);
-    EXPECT_TRUE(state_str.find(status_msg3.state_str) != std::string::npos);
-  });
+  rtr_control_ros::RobotStatus status_msg3 =
+      CreateRobotStatusMessage(RobotManagerInterface::State::ERROR, "state string");
+  observer->AddRobotStatusChangedCallback(
+      [&](const int old_status, const int current_status, const std::string& state_str) {
+        EXPECT_EQ(old_status, status_msg2.state);
+        EXPECT_EQ(current_status, status_msg3.state);
+        EXPECT_TRUE(state_str.find(status_msg3.state_str) != std::string::npos);
+      });
   status_pub.publish(status_msg3);
   while (observer->GetRobotStatus() == status_msg2.state) {
     ros::spinOnce();
@@ -163,11 +155,9 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   RapidSenseRobotConfig config = CreateRobotConfig(project);
 
   // Create RosController
-  RosController::Ptr controller =
-      CreateRosController(robot_type, config.safe_name);
+  RosController::Ptr controller = CreateRosController(robot_type, config.safe_name);
   ASSERT_TRUE(controller);
-  EXPECT_EQ(controller->GetDetailedState().state,
-            RobotManagerInterface::State::DISCONNECTED);
+  EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::DISCONNECTED);
 
   // Create RosRobotProxy
   RobotProxy::Ptr proxy = RobotProxy::MakePtr();
@@ -175,8 +165,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
 
   //// Test SetupRTR
   EXPECT_TRUE(proxy->SetupRTR());
-  EXPECT_EQ(controller->GetDetailedState().state,
-            RobotManagerInterface::State::CONNECTED);
+  EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::CONNECTED);
 
   //// Test AcquireControl
   EXPECT_TRUE(proxy->AcquireControl());
@@ -208,12 +197,11 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
       proxy->Halt();
     });
     EXPECT_TRUE(proxy->SendJointPath(joints));
-    cancelled = true; // make sure halt_thread cannot get stuck
+    cancelled = true;  // make sure halt_thread cannot get stuck
     if (halt_thread.joinable()) {
       halt_thread.join();
     }
-    EXPECT_FALSE(
-        joints.back().FuzzyEquals(proxy->GetCurrentJointConfiguration()));
+    EXPECT_FALSE(joints.back().FuzzyEquals(proxy->GetCurrentJointConfiguration()));
   } else {
     RTR_INFO("Skipping flaky test RosRobotObserver::Halt");
   }
@@ -230,7 +218,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   controller->Shutdown();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   ros::init(argc, argv, "RosRobotObserverTest");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

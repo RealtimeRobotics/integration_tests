@@ -12,16 +12,14 @@ using namespace std;
 // A simple data structure for testing buffers
 struct Temp {
   Temp() : time(std::chrono::high_resolution_clock::now()), index(0) {}
-  Temp(const int idx)
-      : time(std::chrono::high_resolution_clock::now()), index(idx) {}
-  Temp(const int idx, const SensorTime timestamp)
-      : time(timestamp), index(idx) {}
+  Temp(const int idx) : time(std::chrono::high_resolution_clock::now()), index(idx) {}
+  Temp(const int idx, const SensorTime timestamp) : time(timestamp), index(idx) {}
 
   SensorTime time;
   int index;
 };
 
-void EmptyBufferCheck(BufferInterface<Temp> &buffer) {
+void EmptyBufferCheck(BufferInterface<Temp>& buffer) {
   buffer.Clear();
   Temp t;
   EXPECT_EQ(buffer.size(), 0u);
@@ -30,15 +28,15 @@ void EmptyBufferCheck(BufferInterface<Temp> &buffer) {
   EXPECT_FALSE(buffer.get(t));
 }
 
-void GenerateData(std::vector<Temp> &data, const int &start, const int &end) {
+void GenerateData(std::vector<Temp>& data, const int& start, const int& end) {
   data.clear();
   for (int i = start; i < end; i++) {
     data.emplace_back(Temp(i));
   }
 }
 
-void AddData(BufferInterface<Temp> &buffer, const std::vector<Temp> &add_data,
-             const int &delay_ms) {
+void AddData(BufferInterface<Temp>& buffer, const std::vector<Temp>& add_data,
+             const int& delay_ms) {
   int num_data = add_data.size();
   for (int i = 0; i < num_data; i++) {
     std::this_thread::sleep_for(std::chrono::microseconds(delay_ms * 1000));
@@ -47,8 +45,8 @@ void AddData(BufferInterface<Temp> &buffer, const std::vector<Temp> &add_data,
   }
 }
 
-void RemoveData(BufferInterface<Temp> &buffer, const int &num_remove,
-                std::vector<Temp> &removed_data, const int &delay_ms) {
+void RemoveData(BufferInterface<Temp>& buffer, const int& num_remove,
+                std::vector<Temp>& removed_data, const int& delay_ms) {
   removed_data.clear();
   for (int i = 0; i < num_remove; i++) {
     Temp t;
@@ -61,7 +59,7 @@ void RemoveData(BufferInterface<Temp> &buffer, const int &num_remove,
   }
 }
 
-void BufferAddRemoveElementCheck(BufferInterface<Temp> &buffer) {
+void BufferAddRemoveElementCheck(BufferInterface<Temp>& buffer) {
   buffer.Clear();
   Temp t;
   buffer.add(Temp(-2));
@@ -73,17 +71,15 @@ void BufferAddRemoveElementCheck(BufferInterface<Temp> &buffer) {
   EXPECT_EQ(t.index, -2);
 }
 
-void BufferAddDataCheck(BufferInterface<Temp> &buffer,
-                        const std::vector<Temp> &add_data,
-                        const int &size_after_add) {
+void BufferAddDataCheck(BufferInterface<Temp>& buffer, const std::vector<Temp>& add_data,
+                        const int& size_after_add) {
   AddData(buffer, add_data, 0);
   EXPECT_FALSE(buffer.empty());
   EXPECT_EQ(buffer.size(), size_t(size_after_add));
 }
 
-void BufferRemoveArrayCheck(BufferInterface<Temp> &buffer,
-                            const std::vector<Temp> &removed_data_gt,
-                            const int &size_after_remove) {
+void BufferRemoveArrayCheck(BufferInterface<Temp>& buffer, const std::vector<Temp>& removed_data_gt,
+                            const int& size_after_remove) {
   std::vector<Temp> removed_data;
   int num_remove = removed_data_gt.size();
   RemoveData(buffer, num_remove, removed_data, 0);
@@ -96,7 +92,7 @@ void BufferRemoveArrayCheck(BufferInterface<Temp> &buffer,
   EXPECT_EQ(buffer.size(), size_t(size_after_remove));
 }
 
-void FIFOBufferCheck(BufferInterface<Temp> &buffer) {
+void FIFOBufferCheck(BufferInterface<Temp>& buffer) {
   buffer.Clear();
   Temp t1, t2;
   AddData(buffer, {Temp(3), Temp(4), Temp(5)}, 0);
@@ -110,15 +106,14 @@ void FIFOBufferCheck(BufferInterface<Temp> &buffer) {
   EXPECT_EQ(t1.index, t2.index);
 }
 
-void BufferWaitForCheck(BufferInterface<Temp> &buffer) {
+void BufferWaitForCheck(BufferInterface<Temp>& buffer) {
   if (getenv("DISABLE_RS_FLAKYTESTS")) {
     RTR_INFO("Skipping buffer WaitFor Check");
     return;
   }
   buffer.Clear();
   Temp t, t_add(51);
-  std::thread add_thread(
-      std::bind(AddData, std::ref(buffer), std::vector<Temp>(1, t_add), 2));
+  std::thread add_thread(std::bind(AddData, std::ref(buffer), std::vector<Temp>(1, t_add), 2));
   EXPECT_TRUE(buffer.empty());
   EXPECT_FALSE(buffer.wait_for(t, 0.001));
   EXPECT_NE(t.index, t_add.index);
@@ -131,7 +126,7 @@ void BufferWaitForCheck(BufferInterface<Temp> &buffer) {
   }
 }
 
-void AgingBufferCheck(BufferInterface<Temp> &buffer) {
+void AgingBufferCheck(BufferInterface<Temp>& buffer) {
   if (getenv("DISABLE_RS_FLAKYTESTS")) {
     RTR_INFO("Skipping Buffer Aging Data Check");
     return;
@@ -202,8 +197,7 @@ TEST(BufferTest, BufferQueueTMultiThreaded) {
 
   std::thread q1(std::bind(&AddData, std::ref(buffer), data1, 2));
   std::thread q2(std::bind(&AddData, std::ref(buffer), data2, 2));
-  std::thread q3(std::bind(&RemoveData, std::ref(buffer), 1000,
-                           std::ref(data_removed), 4));
+  std::thread q3(std::bind(&RemoveData, std::ref(buffer), 1000, std::ref(data_removed), 4));
 
   if (q1.joinable()) {
     q1.join();
@@ -215,7 +209,7 @@ TEST(BufferTest, BufferQueueTMultiThreaded) {
     q3.join();
   }
 
-  for (const Temp &dat : data_removed) {
+  for (const Temp& dat : data_removed) {
     int val = dat.index;
     if (val >= 1000 && val < 2000) {
       add1 += 1;
@@ -233,7 +227,7 @@ TEST(BufferTest, BufferQueueTMultiThreaded) {
 
   RemoveData(buffer, 1000, data_removed, 0);
 
-  for (const Temp &dat : data_removed) {
+  for (const Temp& dat : data_removed) {
     int val = dat.index;
     if (val >= 1000 && val < 2000) {
       add1 += 1;
@@ -285,8 +279,7 @@ TEST(BufferTest, BufferLastTMultithreaded) {
 
   std::thread q1(std::bind(&AddData, std::ref(buffer), data1, 2));
   std::thread q2(std::bind(&AddData, std::ref(buffer), data2, 2));
-  std::thread q3(
-      std::bind(&RemoveData, std::ref(buffer), 1, std::ref(data_removed), 40));
+  std::thread q3(std::bind(&RemoveData, std::ref(buffer), 1, std::ref(data_removed), 40));
 
   if (q1.joinable()) {
     q1.join();
@@ -393,7 +386,7 @@ TEST(BufferTest, BufferQueueWithAgingTMultiThreaded) {
 
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   RTR_INFO("Running Buffer tests...");
   return RUN_ALL_TESTS();

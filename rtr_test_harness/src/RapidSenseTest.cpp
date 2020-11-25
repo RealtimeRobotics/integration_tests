@@ -14,10 +14,9 @@ namespace rtr {
 namespace perception {
 
 RapidSenseTest::RapidSenseTest()
-    : nh_(""), app_commander_("127.0.0.1"),
-      proxy_(RapidSenseFrontEndProxy::MakePtr()) {}
+    : nh_(""), app_commander_("127.0.0.1"), proxy_(RapidSenseFrontEndProxy::MakePtr()) {}
 
-bool RapidSenseTest::Init(const std::string &dir) {
+bool RapidSenseTest::Init(const std::string& dir) {
   test_dir_ = dir;
 
   if (!SetIgnoreVisionEnabledOnServer(true)) {
@@ -29,8 +28,7 @@ bool RapidSenseTest::Init(const std::string &dir) {
   }
 
   if (config_.sim_mode) {
-    ros::ServiceClient client =
-        nh_.serviceClient<std_srvs::Trigger>("restart_sim");
+    ros::ServiceClient client = nh_.serviceClient<std_srvs::Trigger>("restart_sim");
     std_srvs::Trigger trigger;
     if (!client.call(trigger) || !trigger.response.success) {
       RTR_ERROR("Failed to refresh server");
@@ -46,10 +44,10 @@ bool RapidSenseTest::Init(const std::string &dir) {
     return false;
   }
   observers_ = proxy_->GetObservers();
-  region_desc_ = VoxelRegionDescription(
-      proxy_->GetVoxelRegionNumVoxels(config_.voxel_stream_name),
-      proxy_->GetVoxelRegionDimensions(config_.voxel_stream_name) / 2.0,
-      proxy_->GetVoxelRegionPose(config_.voxel_stream_name).Inverse());
+  region_desc_ =
+      VoxelRegionDescription(proxy_->GetVoxelRegionNumVoxels(config_.voxel_stream_name),
+                             proxy_->GetVoxelRegionDimensions(config_.voxel_stream_name) / 2.0,
+                             proxy_->GetVoxelRegionPose(config_.voxel_stream_name).Inverse());
 
   if (observers_.empty()) {
     RTR_ERROR("Cannot initialize with no robots");
@@ -61,15 +59,13 @@ bool RapidSenseTest::Init(const std::string &dir) {
     return false;
   }
 
-  for (const auto &observer : observers_) {
+  for (const auto& observer : observers_) {
     RTR_INFO("Decon group {} {} {}", config_.decon_group, observer->GetName(),
              observer->GetStateSpaceName());
-    ExtCode res =
-        app_commander_.InitGroup(config_.decon_group, observer->GetName(),
-                                 observer->GetStateSpaceName());
+    ExtCode res = app_commander_.InitGroup(config_.decon_group, observer->GetName(),
+                                           observer->GetStateSpaceName());
     if (res != ExtCode::SUCCESS) {
-      RTR_ERROR("Failed to InitGroup with error: {}",
-                Convert<std::string>(ExtCode(res)));
+      RTR_ERROR("Failed to InitGroup with error: {}", Convert<std::string>(ExtCode(res)));
       return false;
     }
 
@@ -81,8 +77,7 @@ bool RapidSenseTest::Init(const std::string &dir) {
     }
   }
 
-  benchmark_manager_ = RosBenchmarkManager::MakePtr(
-      nh_, config_.voxel_stream_name, region_desc_);
+  benchmark_manager_ = RosBenchmarkManager::MakePtr(nh_, config_.voxel_stream_name, region_desc_);
 
   return benchmark_manager_->Init(observers_);
 }
@@ -90,23 +85,21 @@ bool RapidSenseTest::Init(const std::string &dir) {
 bool RapidSenseTest::CheckRapidSenseServerState_() {
   // check RapidSense
   ros::ServiceClient get_config_client =
-      nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(
-          RS::Topic("get_configuration"));
-  if (!ros::service::waitForService(get_config_client.getService(),
-                                    ros::Duration(10.0))) {
+      nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(RS::Topic("get_configuration"));
+  if (!ros::service::waitForService(get_config_client.getService(), ros::Duration(10.0))) {
     RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
     return false;
   }
 
   rtr_perc_rapidsense_ros::GetSchemaMessage srv;
-  if (!get_config_client.call(srv) ||
-      !FromSchemaMessageResponse(srv.response, rapidsense_config_)) {
+  if (!get_config_client.call(srv)
+      || !FromSchemaMessageResponse(srv.response, rapidsense_config_)) {
     RTR_ERROR("Failed to get configuration from RapidSenseServer");
     return false;
   }
 
   bool config_ok = true;
-  for (auto &stream : rapidsense_config_.streams) {
+  for (auto& stream : rapidsense_config_.streams) {
     if (stream.enable_robotfilter != config_.test_robot_filter) {
       stream.enable_robotfilter = config_.test_robot_filter;
       config_ok = false;
@@ -114,15 +107,13 @@ bool RapidSenseTest::CheckRapidSenseServerState_() {
   }
 
   if (!config_ok) {
-    RTR_ERROR(
-        "RapidSenseServer configuration does not match test requirements");
+    RTR_ERROR("RapidSenseServer configuration does not match test requirements");
     return false;
   }
 
   RTR_WARN("Waiting for RapidSense health on topic {}", RS::Topic("health"));
   rtr_msgs::SchemaMessage::ConstPtr health_msg =
-      ros::topic::waitForMessage<rtr_msgs::SchemaMessage>(RS::Topic("health"),
-                                                          ros::Duration(10.0));
+      ros::topic::waitForMessage<rtr_msgs::SchemaMessage>(RS::Topic("health"), ros::Duration(10.0));
   if (!health_msg) {
     RTR_ERROR("Timed out waiting for health message from RapidSenseServer");
     return false;
@@ -131,7 +122,7 @@ bool RapidSenseTest::CheckRapidSenseServerState_() {
   RapidSenseHealth health;
   try {
     health = FromSchemaMessage<RapidSenseHealth>(*health_msg);
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     RTR_ERROR("Could not get RapidSense health: {}", e.what());
     return false;
   }
@@ -140,8 +131,8 @@ bool RapidSenseTest::CheckRapidSenseServerState_() {
     return false;
   }
 
-  return health.active_deconfliction_group == config_.decon_group &&
-         health.current_status.state == RapidSenseState::OPERATION;
+  return health.active_deconfliction_group == config_.decon_group
+         && health.current_status.state == RapidSenseState::OPERATION;
 }
 
 std::string RapidSenseTest::GetParameterFilename() const {
@@ -156,8 +147,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   if (use_live_data) {
     res = app_commander_.BeginOperationMode();
     if (res != ExtCode::SUCCESS) {
-      RTR_ERROR("Failed to BeginOperationMode with error: {}",
-                Convert<std::string>(ExtCode(res)));
+      RTR_ERROR("Failed to BeginOperationMode with error: {}", Convert<std::string>(ExtCode(res)));
       test_result_->result_ = RapidSenseTestResult::OPERATION_FAILURE;
       return false;
     }
@@ -166,9 +156,8 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   // attempt to move to first hub
   // TODO: extend this to multirobot
   RapidSenseTestHubConfig hub_config = config_.hub_sequence.front();
-  ExtCodeSeqPair pair =
-      app_commander_.MoveToHub(hub_config.active_robot, hub_config.state_space,
-                               hub_config.hub_name, config_.speed);
+  ExtCodeSeqPair pair = app_commander_.MoveToHub(hub_config.active_robot, hub_config.state_space,
+                                                 hub_config.hub_name, config_.speed);
   res = pair.first;
   seq_num = pair.second;
   if (res == ExtCode::START_CONFIG_NOT_WITHIN_TOL_TO_ROADMAP) {
@@ -179,22 +168,20 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
                  "to hub? (y/n)";
     std::getline(std::cin, input);
     if (input == "y") {
-      pair = app_commander_.OffroadToHub(
-          hub_config.active_robot, hub_config.state_space, hub_config.hub_name);
+      pair = app_commander_.OffroadToHub(hub_config.active_robot, hub_config.state_space,
+                                         hub_config.hub_name);
     }
   }
 
   if (res != ExtCode::SUCCESS) {
-    RTR_ERROR("Failed to move to initial hub with error: {}",
-              Convert<std::string>(ExtCode(res)));
+    RTR_ERROR("Failed to move to initial hub with error: {}", Convert<std::string>(ExtCode(res)));
     test_result_->result_ = RapidSenseTestResult::OPERATION_FAILURE;
     return false;
   }
 
   res = app_commander_.WaitForMove(seq_num);
   if (res != ExtCode::SUCCESS) {
-    RTR_ERROR("Failed to WaitForMove with error: {}",
-              Convert<std::string>(ExtCode(res)));
+    RTR_ERROR("Failed to WaitForMove with error: {}", Convert<std::string>(ExtCode(res)));
     test_result_->result_ = RapidSenseTestResult::OPERATION_FAILURE;
     return false;
   }
@@ -209,7 +196,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   }
 
   // start benchmarking
-  auto on_data = [this](const BenchmarkManager::MetricFrame &metric) {
+  auto on_data = [this](const BenchmarkManager::MetricFrame& metric) {
     this->test_result_->Update(metric);
   };
   benchmark_manager_->SetRobotBenchmarkEnable(!config_.test_robot_filter);
@@ -232,8 +219,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   if (use_live_data) {
     res = app_commander_.EndOperationMode();
     if (res != ExtCode::SUCCESS) {
-      RTR_ERROR("Failed to EndOperationMode with error: {}",
-                Convert<std::string>(ExtCode(res)));
+      RTR_ERROR("Failed to EndOperationMode with error: {}", Convert<std::string>(ExtCode(res)));
     }
   }
 
@@ -283,8 +269,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   return true;
 }
 
-bool RapidSenseTest::MoveToHubs_(
-    std::vector<RapidSenseTestHubConfig> &hub_sequence) {
+bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_sequence) {
   bool no_interrupts = true;
   std::atomic_int hub_idx(1);
 
@@ -293,7 +278,7 @@ bool RapidSenseTest::MoveToHubs_(
   size_t seq_num;
 
   hub_sequence = config_.hub_sequence;
-  for (auto &hub_config : hub_sequence) {
+  for (auto& hub_config : hub_sequence) {
     hub_config.joint_configs.clear();
   }
 
@@ -302,37 +287,32 @@ bool RapidSenseTest::MoveToHubs_(
   std::vector<ros::Subscriber> js_subs, result_subs, feedback_subs;
   std::vector<uint32_t> edge_indices;
 
-  for (const auto &observer : observers_) {
-    RosController::TopicNames names =
-        RosController::GetTopicNames(observer->GetName());
+  for (const auto& observer : observers_) {
+    RosController::TopicNames names = RosController::GetTopicNames(observer->GetName());
 
     auto buffer = BufferLastT<sensor_msgs::JointState>::MakePtr();
 
-    auto buffer_latest_js =
-        [buffer](const sensor_msgs::JointState::ConstPtr &msg) {
-          buffer->add(*msg);
-        };
-    js_subs.push_back(nh_.subscribe<sensor_msgs::JointState>(
-        names.joint_states, 10, buffer_latest_js));
+    auto buffer_latest_js = [buffer](const sensor_msgs::JointState::ConstPtr& msg) {
+      buffer->add(*msg);
+    };
+    js_subs.push_back(
+        nh_.subscribe<sensor_msgs::JointState>(names.joint_states, 10, buffer_latest_js));
 
     auto check_for_interrupts =
-        [&no_interrupts](
-            const rtr_control_ros::FollowJointPathActionResult::ConstPtr &msg) {
+        [&no_interrupts](const rtr_control_ros::FollowJointPathActionResult::ConstPtr& msg) {
           if (msg->result.error_code != 0) {
             no_interrupts = false;
           }
         };
-    result_subs.push_back(
-        nh_.subscribe<rtr_control_ros::FollowJointPathActionResult>(
-            names.follow_joint_path + "/result", 10, check_for_interrupts));
+    result_subs.push_back(nh_.subscribe<rtr_control_ros::FollowJointPathActionResult>(
+        names.follow_joint_path + "/result", 10, check_for_interrupts));
 
     // store approximation of key points in path
     edge_indices.push_back(0);
-    uint32_t &old_edge_idx = edge_indices.back();
+    uint32_t& old_edge_idx = edge_indices.back();
     auto store_key_points =
         [&old_edge_idx, &hub_idx, &hub_sequence,
-         buffer](const rtr_control_ros::FollowJointPathActionFeedback::ConstPtr
-                     &msg) {
+         buffer](const rtr_control_ros::FollowJointPathActionFeedback::ConstPtr& msg) {
           if (msg->feedback.current_edgeid_idx != old_edge_idx) {
             sensor_msgs::JointState js;
             if (buffer->front(js)) {
@@ -345,27 +325,23 @@ bool RapidSenseTest::MoveToHubs_(
           }
           old_edge_idx = msg->feedback.current_edgeid_idx;
         };
-    feedback_subs.push_back(
-        nh_.subscribe<rtr_control_ros::FollowJointPathActionFeedback>(
-            names.follow_joint_path + "/feedback", 1, store_key_points));
+    feedback_subs.push_back(nh_.subscribe<rtr_control_ros::FollowJointPathActionFeedback>(
+        names.follow_joint_path + "/feedback", 1, store_key_points));
   }
 
   for (auto it = hub_sequence.begin() + 1; it != hub_sequence.end(); ++it) {
-    pair = app_commander_.MoveToHub(it->active_robot, it->state_space,
-                                    it->hub_name, config_.speed);
+    pair = app_commander_.MoveToHub(it->active_robot, it->state_space, it->hub_name, config_.speed);
     res = pair.first;
     seq_num = pair.second;
     if (res != ExtCode::SUCCESS) {
-      RTR_ERROR("Failed to MoveToHub with error: {}",
-                Convert<std::string>(ExtCode(res)));
+      RTR_ERROR("Failed to MoveToHub with error: {}", Convert<std::string>(ExtCode(res)));
       test_result_->result_ = RapidSenseTestResult::OPERATION_FAILURE;
       return false;
     }
 
     res = app_commander_.WaitForMove(seq_num);
     if (res != ExtCode::SUCCESS) {
-      RTR_ERROR("Failed to WaitForMove with error: {}",
-                Convert<std::string>(ExtCode(res)));
+      RTR_ERROR("Failed to WaitForMove with error: {}", Convert<std::string>(ExtCode(res)));
       test_result_->result_ = RapidSenseTestResult::OPERATION_FAILURE;
       return false;
     }
@@ -400,7 +376,7 @@ std::string GetActiveDeconGroup() {
   return "";
 }
 
-bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group) {
+bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group) {
   ros::NodeHandle nh("");
   ros::ServiceClient decon_groups_client =
       nh.serviceClient<rtr_msgs::GetGroupInfo>("/GetDeconGroupInfo");
@@ -412,7 +388,7 @@ bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group) {
     return false;
   }
 
-  for (const auto &group : srv.response.groups) {
+  for (const auto& group : srv.response.groups) {
     if (group.loaded && group.vision_enabled) {
       loaded_group = group;
       return true;
@@ -422,8 +398,8 @@ bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group) {
   return false;
 }
 
-bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr> &observers,
-                           VoxelRegionDescription &region_desc) {
+bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr>& observers,
+                           VoxelRegionDescription& region_desc) {
   rtr_msgs::DeconGroupInfo group_info;
   if (!GetLoadedDeconGroup(group_info)) {
     return false;
@@ -434,7 +410,7 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr> &observers,
       nh.serviceClient<rtr_msgs::GetProjectROSInfo>("/GetProjectROSInfo");
   ros::service::waitForService(prj_info_client.getService());
 
-  for (const auto &project_name : group_info.projects) {
+  for (const auto& project_name : group_info.projects) {
     rtr_msgs::GetProjectROSInfo prj_info;
     prj_info.request.project_name = project_name;
     if (!prj_info_client.call(prj_info) || !prj_info.response.valid) {
@@ -450,8 +426,7 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr> &observers,
 
     VoxelRegion region = project->GetVoxelRegion();
     region_desc = VoxelRegionDescription(
-        {DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION,
-         DEFAULT_MPA_RESOLUTION},
+        {DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION, DEFAULT_MPA_RESOLUTION},
         region.GetDimensions() / 2.0, region.GetPose().Inverse());
 
     RapidSenseRobotConfig config;
@@ -474,16 +449,15 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr> &observers,
 bool SetIgnoreVisionEnabledOnServer(const bool enable) {
   ros::NodeHandle nh("");
   rtr_perc_rapidsense_ros::GetSchemaMessage srv;
-  ros::ServiceClient vision_client =
-      nh.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(
-          RS::Topic("set_ignore_vision_enabled"));
-  if (!ToSchemaMessageRequest(enable, srv.request) ||
-      !vision_client.call(srv) || !srv.response.is_success) {
+  ros::ServiceClient vision_client = nh.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(
+      RS::Topic("set_ignore_vision_enabled"));
+  if (!ToSchemaMessageRequest(enable, srv.request) || !vision_client.call(srv)
+      || !srv.response.is_success) {
     RTR_ERROR("Failed to set ignore vision enabled on RapidSense server");
     return false;
   }
   return true;
 }
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr

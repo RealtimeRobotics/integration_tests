@@ -17,24 +17,24 @@ namespace rtr {
 namespace perception {
 
 class RapidSenseTestHelper : public ApplianceTestHelper {
-public:
-  RapidSenseTestHelper(ros::NodeHandle &nh);
+ public:
+  RapidSenseTestHelper(ros::NodeHandle& nh);
 
   // @brief Get rapidsense server config via ros
-  bool GetRapidSenseServerConfig(SpatialPerceptionProjectSchema &config);
+  bool GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config);
 
   // @brief Check rapidsense server config matches
-  bool CheckRapidSenseServerConfig(RapidSenseTestConfig &config);
+  bool CheckRapidSenseServerConfig(RapidSenseTestConfig& config);
 
   // @brief Set rapidsense server to passed config
-  bool SetRapidSenseServerConfig(RapidSenseTestConfig &config);
+  bool SetRapidSenseServerConfig(RapidSenseTestConfig& config);
 
   // @brief Get health state from rapidsense server via ros
-  bool GetRapidSenseServerHealth(RapidSenseHealth &health);
+  bool GetRapidSenseServerHealth(RapidSenseHealth& health);
 
   // @brief Check rapidsense server health state matches
-  bool CheckRapidSenseServerState(RapidSenseState &state);
+  bool CheckRapidSenseServerState(RapidSenseState& state);
 };
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr

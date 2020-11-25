@@ -26,15 +26,15 @@ namespace perception {
 
 // Brings up Appliance and RapidSenseServer nodes.
 class RapidSenseTestHarnessServer {
-public:
+ public:
   RapidSenseTestHarnessServer();
 
-  bool SetUp(const std::string &app_dir, const std::string &rs_dir);
+  bool SetUp(const std::string& app_dir, const std::string& rs_dir);
   void Teardown();
   // bool SetupDeconflictionGroup(const std::string& project, const std::string&
   // DC_group);
 
-private:
+ private:
   ros::NodeHandle nh_;
   std::string appliance_dir_, rapidsense_dir_;
   // rtr::Appliance::Ptr appliance_;
@@ -44,7 +44,7 @@ private:
   ros::AsyncSpinner spinner_;
 };
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr
 
-#endif // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETEST_HPP_
+#endif  // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETEST_HPP_

@@ -24,10 +24,10 @@ namespace perception {
 class RapidSenseFrontEndProxy;
 
 class RapidSenseTest {
-public:
+ public:
   RapidSenseTest();
 
-  bool Init(const std::string &dir);
+  bool Init(const std::string& dir);
 
   bool Run(const bool use_live_data, const bool record_data);
 
@@ -35,10 +35,10 @@ public:
 
   RapidSenseTestResult::Ptr GetResult() const;
 
-private:
+ private:
   bool CheckRapidSenseServerState_();
 
-  bool MoveToHubs_(std::vector<RapidSenseTestHubConfig> &hub_sequence);
+  bool MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_sequence);
 
   ros::NodeHandle nh_;
 
@@ -56,12 +56,12 @@ private:
 
 // TODO: move these utilities into rtr_perc_rapidsense_ros
 std::string GetActiveDeconGroup();
-bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo &loaded_group);
-bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr> &observers,
-                           VoxelRegionDescription &region_desc);
+bool GetLoadedDeconGroup(rtr_msgs::DeconGroupInfo& loaded_group);
+bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr>& observers,
+                           VoxelRegionDescription& region_desc);
 bool SetIgnoreVisionEnabledOnServer(const bool enable);
 
-} // namespace perception
-} // namespace rtr
+}  // namespace perception
+}  // namespace rtr
 
-#endif // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETEST_HPP_
+#endif  // RTR_APPS_RTR_SPATIAL_PERCEPTION_INC_RTR_SPATIAL_PERCEPTION_RAPIDSENSETEST_HPP_
