@@ -36,8 +36,9 @@ void RunMaskTest(const RobotMaskGenerator::Type type, const std::string& robot_m
   generator->Shutdown();
 }
 
-// The other RobotMaskGenerator tests are kept in rtr_perc_spatial, but the OpenCL ones require
-// resources which are not guaranteed to the rapidplan-ci stage
+// The other RobotMaskGenerator tests are kept in rtr_perc_spatial, but the
+// OpenCL ones require resources which are not guaranteed to the rapidplan-ci
+// stage
 TEST(OpenCLRobotMaskGenerator, URTest) {
   const int fill_tolerance = 0;
   // Some surface details different between OpenCL and Collision

@@ -39,13 +39,16 @@ bool TestStartStopSensors(const std::set<std::string>& sensors, const SelectedFr
   // if serial killer is not present, log error but allow the test to pass
   if (!StartStopSensors(sensors, types)) {
     if (has_serial_killer) {
-      RTR_ERROR("Failed to start and stop sensors. Attempting to recover malfunctioning devices");
+      RTR_ERROR(
+          "Failed to start and stop sensors. Attempting to recover "
+          "malfunctioning devices");
       EXPECT_FALSE(SensorManager::getInstance()->RecoverMalfunctioningDevices().empty());
       EXPECT_TRUE(SensorManager::getInstance()->connect(sensors));
       return StartStopSensors(sensors, types);
     } else {
       RTR_ERROR(
-          "Failed to start and stop sensors, but no serial killer is present. Allowing test to "
+          "Failed to start and stop sensors, but no serial killer is "
+          "present. Allowing test to "
           "pass");
     }
   }
@@ -60,7 +63,9 @@ TEST(RealsenseSensor, SerialKillerReconnect) {
 
   std::string serial;
   if (!SerialKiller::GetInstance()->SerialNumber(serial) || serial.empty()) {
-    RTR_WARN("No serial killer discovered. Skipping test RealsenseSensor::SerialKillerReconnect");
+    RTR_WARN(
+        "No serial killer discovered. Skipping test "
+        "RealsenseSensor::SerialKillerReconnect");
     return;
   }
 
@@ -70,7 +75,9 @@ TEST(RealsenseSensor, SerialKillerReconnect) {
   // check for sensors, skip if not available
   std::set<std::string> sensors = smgr->discover();
   if (sensors.empty()) {
-    RTR_WARN("No sensors discovered. Skipping test RealsenseSensor::SerialKillerReconnect");
+    RTR_WARN(
+        "No sensors discovered. Skipping test "
+        "RealsenseSensor::SerialKillerReconnect");
     return;
   }
 
@@ -78,7 +85,8 @@ TEST(RealsenseSensor, SerialKillerReconnect) {
   if (!smgr->connect(sensors)) {
     smgr->disconnect(sensors);
     RTR_WARN(
-        "Sensors could not be connected. Firmware update may be required. Skipping test "
+        "Sensors could not be connected. Firmware update may be required. "
+        "Skipping test "
         "RealsenseSensor::NormalDeviceUsage");
     return;
   }
@@ -113,7 +121,9 @@ TEST(RealsenseSensor, NormalDeviceUsage) {
   // check for sensors, skip if not available
   std::set<std::string> sensors = smgr->discover();
   if (sensors.empty()) {
-    RTR_WARN("No sensors discovered. Skipping test RealsenseSensor::NormalDeviceUsage");
+    RTR_WARN(
+        "No sensors discovered. Skipping test "
+        "RealsenseSensor::NormalDeviceUsage");
     return;
   }
 
@@ -121,7 +131,8 @@ TEST(RealsenseSensor, NormalDeviceUsage) {
   if (!smgr->connect(sensors)) {
     smgr->disconnect(sensors);
     RTR_WARN(
-        "Sensors could not be connected. Firmware update may be required. Skipping test "
+        "Sensors could not be connected. Firmware update may be required. "
+        "Skipping test "
         "RealsenseSensor::NormalDeviceUsage");
     return;
   }

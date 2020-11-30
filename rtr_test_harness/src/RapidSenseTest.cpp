@@ -163,7 +163,8 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   if (res == ExtCode::START_CONFIG_NOT_WITHIN_TOL_TO_ROADMAP) {
     // offroad to hub (y/n)
     std::string input;
-    std::cout << "Starting configuration of robot {} is not within tolerance to roadmap. Offroad "
+    std::cout << "Starting configuration of robot {} is not within tolerance "
+                 "to roadmap. Offroad "
                  "to hub? (y/n)";
     std::getline(std::cin, input);
     if (input == "y") {
@@ -227,7 +228,8 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   }
 
   // compare or rewrite test configs
-  // for now, always pass tests if they run. in the future, check if they followed the same sequence
+  // for now, always pass tests if they run. in the future, check if they
+  // followed the same sequence
 #if 0
   auto& last_hub_sequence = config_.hub_sequence;
   for (std::size_t h_idx = 0; h_idx < curr_hub_sequence.size(); ++h_idx) {
@@ -280,7 +282,8 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
     hub_config.joint_configs.clear();
   }
 
-  // subscribe to path and joint states - this is ugly, maybe we can find a better way to do this
+  // subscribe to path and joint states - this is ugly, maybe we can find a
+  // better way to do this
   std::vector<ros::Subscriber> js_subs, result_subs, feedback_subs;
   std::vector<uint32_t> edge_indices;
 

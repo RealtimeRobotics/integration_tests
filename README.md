@@ -2,13 +2,11 @@
 
 To run integration and regtests (assumes megadeb or fully built rapidplan):
 ```
-$ ./scripts/run_perc_tests.sh
+$ source scripts/run_perc_tests.sh
+$ run_perc_tests
+$ show_perc_results_summary
 ```
 
-If you are not running on a RTR controller, and you do not have the resources for the timing dependent tests. Run:
-```
-$ ./scripts/run_perc_tests.sh -d
-```
 
 
 ## Intergration Tests

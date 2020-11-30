@@ -67,8 +67,8 @@ cv::Mat TestRender(const SimSensor::Ptr sensor, const RobotObserver::Ptr robot,
   return image;
 }
 
-// Render depth image for each provided config and check the accuracy of the rendered image
-// against ray-mesh intersection
+// Render depth image for each provided config and check the accuracy of the
+// rendered image against ray-mesh intersection
 void TestDepthAccuracy(const std::string& uid, const std::string& model_name,
                        const std::vector<JointConfiguration>& configs,
                        const int intersect_tolerance) {
@@ -119,8 +119,8 @@ bool DetectFiducial(const RobotObserver::Ptr observer, const JointConfiguration&
   return Calibrator::FindChessboard(image, target, corners);
 }
 
-// Check that the fiducial pose detected by the simulated sensor matches the expected fiducial
-// pose from the robot link transforms
+// Check that the fiducial pose detected by the simulated sensor matches the
+// expected fiducial pose from the robot link transforms
 float ComputeReprojError(const RobotObserver::Ptr observer, const SimSensor::Ptr sensor,
                          const SensorFrameType& ft, const CalibrationTarget& target,
                          const std::vector<cv::Point2f>& corners) {
@@ -212,7 +212,8 @@ TEST(SimSensor, MelcoDepthAccuracy) {
   TestDepthAccuracy(uid, model_name, testutils::MELCO_JOINTS, intersect_tolerance);
 }
 
-//// Verify that different sensors are actually rendering images with different sizes and FOVs
+//// Verify that different sensors are actually rendering images with different
+/// sizes and FOVs
 TEST(SimSensor, SensorModelDepthDifference) {
   const Eigen::Quaterniond q = Eigen::Quaterniond(0.0, 1.0, 0.0, 0.0);
   const Eigen::Vector3d xyz = Eigen::Vector3d(0.0, 0.0, 2.0);

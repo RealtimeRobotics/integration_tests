@@ -5,3 +5,5 @@
 */.catkin_tools/*
 *.catkin_tools/*
 */logs/*
+
+.vscode

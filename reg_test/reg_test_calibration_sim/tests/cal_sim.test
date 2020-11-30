@@ -9,11 +9,11 @@
       args="--runtime-dir=$(arg rs_dir) --state-dir=$(arg rs_dir) --cache_dir=$(arg rs_dir) --config-dir=$(arg rs_dir) --logs-dir=$(arg rs_dir)/">
   </node>
 
-  
-  <test test-name="LatencyTest" pkg="integ_test_latency" type="LatencyTest" time-limit="180">
-    <param name="project" type="string" value="$(env RTR_PERCEPTION_TEST_DATA_ROOT)/rapidsense_testdata/ur3_latency_test1/ur3_november_25.zip" />
-    <param name="rapidsense_data" type="string" value="$(env RTR_PERCEPTION_TEST_DATA_ROOT)/rapidsense_testdata/ur3_latency_test1/rapidsense_data/" />
-    <param name="records" type="string" value="$(env RTR_PERCEPTION_TEST_DATA_ROOT)/rapidsense_testdata/ur3_latency_test1/recordings/" />
+  <test test-name="CalibrationSimTest" pkg="reg_test_calibration_sim" type="CalibrationSimTest" time-limit="600">
+    <param name="project" type="string" value="$(find reg_test_calibration_sim)/../../test_data/ur3_calibration_test/ur3-obstacle.zip" />
+    <param name="rapidsense_data" type="string" value="$(find reg_test_calibration_sim)/../../test_data/ur3_calibration_test/rapidsense_data/" />
     <param name="robot_name"  type="string" value="ur3"/>
+    <param name="flange_frame"  type="string" value="ur3/flange"/>
+    <param name="hub_name"  type="string" value="h_3"/>
   </test>
 </launch>

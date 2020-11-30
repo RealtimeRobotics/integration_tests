@@ -10,8 +10,9 @@
 using namespace rtr;
 using namespace rtr::perception;
 
-// the other RobotProxy tests are in rtr_perc_spatial, but this one relies on IK and
-// cannot be run with rapidplan-ci tests (flaky if not provided enough resources)
+// the other RobotProxy tests are in rtr_perc_spatial, but this one relies on IK
+// and cannot be run with rapidplan-ci tests (flaky if not provided enough
+// resources)
 TEST(RobotProxy, CalibrationIKCalls) {
   if (getenv("DISABLE_RS_FLAKYTESTS")) {
     RTR_INFO("Skipping flaky test RobotProxy::CalibrationIKCalls");

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(reg_test_calibration_sim)
+project(reg_test_record_playback)
 
 set(CMAKE_CXX_STANDARD 14)
 # dpkg assumes multiarch and cmake supports it:
@@ -116,4 +116,4 @@ include_directories(SYSTEM
 ## Testing ##
 #############
 
-rs_add_rostest(CalibrationSimTest)
+rs_add_rostest(RecordPlaybackSimTest)

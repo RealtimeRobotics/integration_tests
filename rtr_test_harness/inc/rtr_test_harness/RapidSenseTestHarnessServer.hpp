@@ -31,7 +31,8 @@ class RapidSenseTestHarnessServer {
 
   bool SetUp(const std::string& app_dir, const std::string& rs_dir);
   void Teardown();
-  // bool SetupDeconflictionGroup(const std::string& project, const std::string& DC_group);
+  // bool SetupDeconflictionGroup(const std::string& project, const std::string&
+  // DC_group);
 
  private:
   ros::NodeHandle nh_;

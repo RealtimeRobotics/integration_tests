@@ -169,10 +169,11 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
 
   //// Test AcquireControl
   EXPECT_TRUE(proxy->AcquireControl());
-  // TODO: Robot controller does not actually register as active (inner robot interface will be
-  // active). Still waiting to hear back from robotics team on this, but it seems like they're
-  // in the middle of a refactor
-  // EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::ACTIVE);
+  // TODO: Robot controller does not actually register as active (inner robot
+  // interface will be active). Still waiting to hear back from robotics team on
+  // this, but it seems like they're in the middle of a refactor
+  // EXPECT_EQ(controller->GetDetailedState().state,
+  // RobotManagerInterface::State::ACTIVE);
   EXPECT_FALSE(controller->HasError());
 
   //// Test moving the robot
@@ -180,7 +181,8 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   EXPECT_TRUE(proxy->SendJointPath(joints));
   EXPECT_TRUE(joints.back().FuzzyEquals(proxy->GetCurrentJointConfiguration()));
 
-  // check halt behavior - note that this test could flake if the halt_thread gets starved
+  // check halt behavior - note that this test could flake if the halt_thread
+  // gets starved
   if (!getenv("DISABLE_RS_FLAKYTESTS")) {
     joints = std::vector<JointConfiguration>({Vec(6, 1.5f), Vec(6, 0.f)});
     std::atomic_bool cancelled(false);
@@ -207,9 +209,9 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   //// Test ReleaseControl
   EXPECT_TRUE(proxy->ReleaseControl());
   EXPECT_FALSE(controller->HasError());
-  // TODO: Robot controller does not return true because it expects to be in HANDOFF
-  // CONNECTED). Still waiting to hear back from robotics team on this, but it seems like they're
-  // in the middle of a refactor
+  // TODO: Robot controller does not return true because it expects to be in
+  // HANDOFF CONNECTED). Still waiting to hear back from robotics team on this,
+  // but it seems like they're in the middle of a refactor
 
   proxy->Shutdown();
   proxy.reset();

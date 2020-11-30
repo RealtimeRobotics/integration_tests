@@ -210,7 +210,8 @@ void TestRobotAccuracy(const SensorIntrinsics2D::ConstPtr intr,
   }
 }
 
-//// Test depth accuracy of basic mesh primitives with different clips and scales
+//// Test depth accuracy of basic mesh primitives with different clips and
+/// scales
 TEST(DepthMeshImageGenerator, MeshDepthAccuracy) {
   SensorMetadata meta("", SensorFrameType::SENSOR_FRAME_IMAGE_DEPTH);
   SensorIntrinsics2D::Ptr intr = SensorIntrinsics2D::MakePtr(
@@ -232,7 +233,8 @@ TEST(DepthMeshImageGenerator, MeshDepthAccuracy) {
 }
 
 //// Test depth accuracy of robot model + mesh primitives
-// Note that this is only a simple robot model test, SimSensorTest provides more extensive testing
+// Note that this is only a simple robot model test, SimSensorTest provides more
+// extensive testing
 TEST(DepthMeshImageGenerator, RobotModelDepthAccuracy) {
   SensorMetadata meta("", SensorFrameType::SENSOR_FRAME_IMAGE_DEPTH);
   SensorIntrinsics2D::Ptr intr = SensorIntrinsics2D::MakePtr(
@@ -250,7 +252,8 @@ TEST(DepthMeshImageGenerator, RobotModelDepthAccuracy) {
                     testutils::UR5_JOINTS);
 }
 
-//// Test ray intersection accuracy of basic primitives with different clips and scales
+//// Test ray intersection accuracy of basic primitives with different clips and
+/// scales
 TEST(ColorMeshImageGenerator, MeshMaskAccuracy) {
   SensorMetadata meta("", SensorFrameType::SENSOR_FRAME_IMAGE_RGB);
   SensorIntrinsics2D::Ptr intr = SensorIntrinsics2D::MakePtr(

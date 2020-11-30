@@ -71,8 +71,9 @@ class RuntimeSimTest : public ::testing::Test {
 
     std::string project, rapidsense_data;
     nh_.param<std::string>("project", project,
-                           ros::package::getPath("integ_test_runtime_sim")
-                               + "/../../test_data/ur3_runtime_test/ur3.zip");
+                           ros::package::getPath("integ_test_runtime_sim") +
+                               "/../../test_data/ur3_runtime_test/"
+                               "ur3_runtime_test_november_25.zip");
     nh_.param<std::string>("rapidsense_data", rapidsense_data,
                            ros::package::getPath("integ_test_runtime_sim")
                                + "/../../test_data/ur3_runtime_test/rapidsense_data");
