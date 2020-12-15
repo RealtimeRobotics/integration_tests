@@ -22,19 +22,24 @@
 
 using namespace rtr::perception;
 using namespace rtr;
-
 namespace bfs = boost::filesystem;
 
+const std::string appliance_dir = "/tmp/appliance_test";
+const std::string rapidsense_dir = "/tmp/rapidsense_test";
+
 int main(int argc, char** argv) {
-  bfs::remove_all("/tmp/appliance_test");
-  bfs::remove_all("/tmp/rapidsense_test");
+  bfs::remove_all(appliance_dir);
+  bfs::remove_all(rapidsense_dir);
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_sim");
 
   ros::init(argc, argv, "CalibrationSimTest");
   RapidSenseTestHarnessServer server;
   std::string rs_path = ros::package::getPath("reg_test_calibration_sim") + "/../../test_data";
-  server.SetUpSim(rs_path);
+  if (!server.SetUpSim(rs_path)) {
+    RTR_ERROR("Failed to setup test server");
+    return EXIT_FAILURE;
+  }
 
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
@@ -42,8 +47,8 @@ int main(int argc, char** argv) {
   server.Teardown();
   // TODO Do not hard code. The appliance/rapidsense may end up using different
   // directories during runtime.
-  bfs::remove_all("/tmp/appliance_test");
-  bfs::remove_all("/tmp/rapidsense_test");
+  bfs::remove_all(appliance_dir);
+  bfs::remove_all(rapidsense_dir);
   return res;
 }
 
@@ -56,6 +61,7 @@ class CalibrationTestFixture : public ::testing::Test {
       robot_param;
 
   void SetUp() override {
+    RTR_INFO("TEST SETUP");
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("flange_frame", flange_frame, "ur3/flange");

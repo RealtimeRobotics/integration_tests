@@ -56,13 +56,13 @@ class LatencyTestFixture : public ::testing::Test {
         "RTR_PERCEPTION_TEST_DATA_ROOT: {}",
         TestPath);
 
-    project = TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3_november_25.zip";
-    rapidsense_data = TestPath + "/rapidsense_testdata/ur3_latency_test1/rapidsense_data/";
-    records = TestPath + "/rapidsense_testdata/ur3_latency_test1/recordings/";
+    project = TestPath + "/ur3_latency_test1/ur3_november_25.zip";
+    rapidsense_data = TestPath + "/ur3_latency_test1/rapidsense_data/";
+    records = TestPath + "/ur3_latency_test1/recordings/";
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
-    std::string robot_param = TestPath + "/rapidsense_testdata/ur3_latency_test1/ur3.json";
+    std::string robot_param = TestPath + "/ur3_latency_test1/ur3.json";
     ASSERT_TRUE(appliance_.InstallProject(project));
     ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
     ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
