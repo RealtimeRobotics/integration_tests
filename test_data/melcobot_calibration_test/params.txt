@@ -1,0 +1,3 @@
+robot: melcobot
+flange: melcobot_rtr_flange
+hub: h2

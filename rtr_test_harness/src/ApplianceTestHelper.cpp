@@ -27,6 +27,7 @@
 #include <rtr_msgs/UpdateGroup.h>
 #include <rtr_msgs/UpdateProject.h>
 #include <rtr_msgs/Version.h>
+#include <rtr_utils/Logging.hpp>
 
 namespace rtr {
 
@@ -125,21 +126,17 @@ bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
 
 bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
                                                const std::string& param_json_path) {
-  try {
-    // take the robot_param json file and create a json obj
-    std::ifstream ifs(param_json_path);
-    nlohmann::json j = nlohmann::json::parse(ifs);
+  // take the robot_param json file and create a json obj
+  std::ifstream ifs(param_json_path);
+  nlohmann::json j = nlohmann::json::parse(ifs);
 
-    // Update Project Info
-    rtr_msgs::UpdateProject srv;
-    srv.request.project_name = prj_name;
-    srv.request.json_data = j.dump();
-    if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject")
-        || srv.response.result_code != 0) {
-      return false;
-    }
-  } catch (std::exception& e) {
-    RTR_ERROR("Caught exception when calling SetProjectRobotParam: {}", e.what());
+  // Update Project Info
+  rtr_msgs::UpdateProject srv;
+  srv.request.project_name = prj_name;
+  srv.request.json_data = j.dump();
+  if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject")
+      || srv.response.result_code != 0) {
+    RTR_WARN("Could not update project {} with params: {}", prj_name, j.dump());
     return false;
   }
 
