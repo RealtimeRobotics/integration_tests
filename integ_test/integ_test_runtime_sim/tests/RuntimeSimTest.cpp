@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   std::string rs_path = ros::package::getPath("integ_test_runtime_sim") + "/../../test_data";
 
   ::testing::InitGoogleTest(&argc, argv);
-  if (!server.SetUp("appliance_test", rs_path)) {
+  if (!server.SetUpSim(rs_path)) {
     RTR_ERROR("Failed to setup test server");
     return EXIT_FAILURE;
   }

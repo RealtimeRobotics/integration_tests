@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "RecordPlaybackSimTest");
   RapidSenseTestHarnessServer server;
   std::string rs_path = ros::package::getPath("reg_test_record_playback") + "/../../test_data";
-  server.SetUp("appliance_test", rs_path);
+  server.SetUpSim(rs_path);
 
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
