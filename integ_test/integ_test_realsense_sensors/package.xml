@@ -9,4 +9,5 @@
   <depend version_gte="1.3.0">rtr_test_cmake_defs</depend>
   <buildtool_depend>catkin</buildtool_depend>
   <depend version_gte="1.3.0">rtr_perc_sensors</depend>
+  <depend version_gte="1.3.0">rtr_utils</depend>
 </package>
