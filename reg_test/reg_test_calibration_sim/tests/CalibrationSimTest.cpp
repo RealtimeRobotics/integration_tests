@@ -40,7 +40,6 @@ int main(int argc, char** argv) {
     RTR_ERROR("Failed to setup test server");
     return EXIT_FAILURE;
   }
-
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
 
