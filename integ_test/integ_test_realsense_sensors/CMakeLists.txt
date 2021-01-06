@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   rtr_cmake_defs
   rtr_perc_sensors
   rtr_test_cmake_defs
+  rtr_utils
 )
 
 # https://github.com/ros/cmake_modules
@@ -31,6 +32,7 @@ find_package(cmake_modules REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
     rtr_perc_sensors
+    rtr_utils
 )
 
 ###########

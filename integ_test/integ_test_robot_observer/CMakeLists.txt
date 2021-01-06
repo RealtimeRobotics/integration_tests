@@ -13,6 +13,7 @@ SET(CMAKE_AUTORCC ON)
 
 find_package(catkin REQUIRED COMPONENTS
   rtr_cmake_defs
+  rtr_control
   rtr_control_ros
   rtr_perc_spatial
   rtr_perc_sensors_ros
@@ -38,6 +39,7 @@ find_package(Qt5 REQUIRED COMPONENTS Core)
 
 catkin_package(
   CATKIN_DEPENDS
+    rtr_control
     rtr_control_ros
     rtr_perc_spatial
     rtr_perc_sensors_ros

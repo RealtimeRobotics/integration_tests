@@ -3,6 +3,7 @@
 
 #include <sensor_msgs/JointState.h>
 
+#include <rtr_control/RobotManagerInterface.hpp>
 #include <rtr_control_ros/RobotStatus.h>
 #include <rtr_control_ros/RosController.hpp>
 #include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>

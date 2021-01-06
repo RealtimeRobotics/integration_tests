@@ -22,16 +22,25 @@
 
 using namespace rtr::perception;
 using namespace rtr;
-
 namespace bfs = boost::filesystem;
 
+const std::string appliance_dir = "/tmp/appliance_test";
+const std::string rapidsense_dir = "/tmp/rapidsense_test";
+
 int main(int argc, char** argv) {
+  bfs::remove_all(appliance_dir);
+  bfs::remove_all(rapidsense_dir);
+
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense");
 
   ros::init(argc, argv, "CalibrationTest");
   RapidSenseTestHarnessServer server;
-  server.SetUp("appliance_test");
+  std::string rs_path = ros::package::getPath("reg_test_calibration") + "/../../test_data";
+  if (!server.SetUpSim(rs_path)) {
+    RTR_ERROR("Failed to setup test server");
+    return EXIT_FAILURE;
+  }
 
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
@@ -39,8 +48,8 @@ int main(int argc, char** argv) {
   server.Teardown();
   // TODO Do not hard code. The appliance/rapidsense may end up using different
   // directories during runtime.
-  bfs::remove_all("/tmp/appliance_test");
-  bfs::remove_all("/tmp/rapidsense_test");
+  bfs::remove_all(appliance_dir);
+  bfs::remove_all(rapidsense_dir);
   return res;
 }
 
