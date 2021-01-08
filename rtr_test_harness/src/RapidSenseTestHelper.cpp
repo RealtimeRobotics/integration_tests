@@ -13,13 +13,13 @@ RapidSenseTestHelper::RapidSenseTestHelper(ros::NodeHandle& nh) : ApplianceTestH
 
 bool RapidSenseTestHelper::GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config) {
   ros::ServiceClient get_config_client =
-      nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(RS::Topic("get_configuration"));
+      nh_.serviceClient<rtr_msgs::GetSchemaMessage>(RS::Topic("get_configuration"));
   if (!ros::service::waitForService(get_config_client.getService(), ros::Duration(10.0))) {
     RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
     return false;
   }
 
-  rtr_perc_rapidsense_ros::GetSchemaMessage srv;
+  rtr_msgs::GetSchemaMessage srv;
   if (!get_config_client.call(srv) || !FromSchemaMessageResponse(srv.response, config)) {
     RTR_ERROR("Failed to get configuration from RapidSenseServer");
     return false;

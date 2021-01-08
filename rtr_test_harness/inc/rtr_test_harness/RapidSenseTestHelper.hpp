@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 #include <ros/service.h>
 
-#include <rtr_perc_rapidsense_ros/GetSchemaMessage.h>
+#include <rtr_msgs/GetSchemaMessage.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseServer.hpp>
 
 #include "rtr_test_harness/ApplianceTestHelper.hpp"

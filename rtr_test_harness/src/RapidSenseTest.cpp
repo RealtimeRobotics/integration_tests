@@ -85,13 +85,13 @@ bool RapidSenseTest::Init(const std::string& dir) {
 bool RapidSenseTest::CheckRapidSenseServerState_() {
   // check RapidSense
   ros::ServiceClient get_config_client =
-      nh_.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(RS::Topic("get_configuration"));
+      nh_.serviceClient<rtr_msgs::GetSchemaMessage>(RS::Topic("get_configuration"));
   if (!ros::service::waitForService(get_config_client.getService(), ros::Duration(10.0))) {
     RTR_ERROR("Timed out waiting for configuration from RapidSenseServer");
     return false;
   }
 
-  rtr_perc_rapidsense_ros::GetSchemaMessage srv;
+  rtr_msgs::GetSchemaMessage srv;
   if (!get_config_client.call(srv)
       || !FromSchemaMessageResponse(srv.response, rapidsense_config_)) {
     RTR_ERROR("Failed to get configuration from RapidSenseServer");
@@ -448,9 +448,9 @@ bool LoadRapidPlanProjects(std::vector<RobotObserver::Ptr>& observers,
 
 bool SetIgnoreVisionEnabledOnServer(const bool enable) {
   ros::NodeHandle nh("");
-  rtr_perc_rapidsense_ros::GetSchemaMessage srv;
-  ros::ServiceClient vision_client = nh.serviceClient<rtr_perc_rapidsense_ros::GetSchemaMessage>(
-      RS::Topic("set_ignore_vision_enabled"));
+  rtr_msgs::GetSchemaMessage srv;
+  ros::ServiceClient vision_client =
+      nh.serviceClient<rtr_msgs::GetSchemaMessage>(RS::Topic("set_ignore_vision_enabled"));
   if (!ToSchemaMessageRequest(enable, srv.request) || !vision_client.call(srv)
       || !srv.response.is_success) {
     RTR_ERROR("Failed to set ignore vision enabled on RapidSense server");
