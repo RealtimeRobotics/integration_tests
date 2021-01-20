@@ -12,6 +12,7 @@
 #include <rtr_appliance/Appliance.hpp>
 #include <rtr_msgs/GetHubConfig.h>
 #include <rtr_msgs/TeleportRobot.h>
+#include <rtr_perc_api/SensorFrame.hpp>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/Record.hpp>
 #include <rtr_perc_sensors/SensorCalibrationData.hpp>
@@ -104,7 +105,7 @@ class RuntimeSimTest : public ::testing::Test {
 
     const SensorFrameType ft(perception::SensorFrameType::SENSOR_FRAME_VOXELS,
                              perception::SensorFrameType::ROBOT_SELF_FILTERED);
-    while (!proxy_.GetFrame(robot_name_, "", ft)) {
+    while (!proxy_.GetFrame("voxel_stream", "", ft)) {
       RTR_WARN("Waiting for RapidSense server to begin publishing voxels");
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -166,18 +167,24 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
 
   //// Test state space changes
   SensorFrameType ft(SensorFrameType::SENSOR_FRAME_VOXELS, SensorFrameType::ROBOT_SELF_FILTERED);
-  SensorFrame::ConstPtr frame = proxy_.GetFrame(robot_name_, "", ft, 0.5, 0.5);
+  SensorFrame::ConstPtr frame = proxy_.GetFrame("voxel_stream", "", ft, 0.5, 0.5);
   EXPECT_TRUE(frame);
   if (frame) {
-    EXPECT_EQ(observer->GetStateSpaceUUIDFromName(default_state_space_),
-              SensorFrameVoxels::CastConstPtr(frame)->GetStateSpace());
+    std::map<std::string, std::string> state_spaces =
+        SensorFrameVoxels::CastConstPtr(frame)->GetStateSpaces();
+    EXPECT_TRUE(state_spaces.count(observer->GetName()));
+    EXPECT_EQ(state_spaces[observer->GetName()],
+              observer->GetStateSpaceUUIDFromName(default_state_space_));
   }
   EXPECT_EQ(appliance_.ChangeWorkspace(robot_name_, other_state_space_), ExtCode::SUCCESS);
-  frame = proxy_.GetFrame(robot_name_, "", ft, 0.5, 0.5);
+  frame = proxy_.GetFrame("voxel_stream", "", ft, 0.5, 0.5);
   EXPECT_TRUE(frame);
   if (frame) {
-    EXPECT_EQ(observer->GetStateSpaceUUIDFromName(other_state_space_),
-              SensorFrameVoxels::CastConstPtr(frame)->GetStateSpace());
+    std::map<std::string, std::string> state_spaces =
+        SensorFrameVoxels::CastConstPtr(frame)->GetStateSpaces();
+    EXPECT_TRUE(state_spaces.count(observer->GetName()));
+    EXPECT_EQ(state_spaces[observer->GetName()],
+              observer->GetStateSpaceUUIDFromName(other_state_space_));
   }
 
   // shutdown

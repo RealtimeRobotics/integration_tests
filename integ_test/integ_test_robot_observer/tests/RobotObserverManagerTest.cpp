@@ -87,13 +87,12 @@ TEST(RobotObserverManager, APICalls) {
           const std::string& robot = pub_pair.first;
           joint_pubs[robot].publish(CreateJointStateMessage(Vec(6, 0.f)));
           status_pubs[robot].publish(
-              CreateRobotStatusMessage(RobotManagerInterface::State::CONNECTED, ""));
+              CreateRobotStatusMessage(robot_manager::State::kConnected, ""));
         }
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   });
-
   //// Test single robot is added properly
   EXPECT_TRUE(manager.UpdateRobots(projects));
   EXPECT_EQ(manager.GetRobotObservers().size(), 1u);
@@ -171,7 +170,7 @@ TEST(RobotObserverManager, APICalls) {
 
   //// Test robot status functionality
   rtr_control_ros::RobotStatus status_msg =
-      CreateRobotStatusMessage(RobotManagerInterface::State::CONNECTED, "");
+      CreateRobotStatusMessage(robot_manager::State::kConnected, "");
   const RobotObserver::Ptr reggie = robot_map["reggie"];
   const RobotObserver::Ptr twister = robot_map["twister"];
   const RobotObserver::Ptr squid = robot_map["squid"];
@@ -185,10 +184,10 @@ TEST(RobotObserverManager, APICalls) {
   }
 
   // add and test callback
-  status_msg = CreateRobotStatusMessage(RobotManagerInterface::State::ERROR, "");
+  status_msg = CreateRobotStatusMessage(robot_manager::State::kDisconnecting, "");
   manager.AddRobotStatusChangedCallback(
       [&](const int old_status, const int current_status, const std::string&) {
-        EXPECT_EQ(old_status, static_cast<int>(RobotManagerInterface::State::CONNECTED));
+        EXPECT_EQ(old_status, static_cast<int>(robot_manager::State::kConnected));
         EXPECT_EQ(current_status, status_msg.state);
       });
 

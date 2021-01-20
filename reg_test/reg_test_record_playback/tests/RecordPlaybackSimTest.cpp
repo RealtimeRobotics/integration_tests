@@ -113,7 +113,7 @@ TEST_F(RapidSenseTestFixture, RecordPlaybackTest) {
   rtr::perception::SensorFrame::ConstPtr imgin;
   rtr::perception::SensorFrameType frame_type =
       SensorFrameType(SensorFrameType::SENSOR_FRAME_VOXELS, SensorFrameType::ROBOT_SELF_FILTERED);
-  imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
+  imgin = proxy_.GetFrame("voxel_stream", "", frame_type, 0.5, 1.0);
   SensorFrameVoxels::ConstPtr voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
   std::vector<Voxel> voxels;
   voxel_ptr->GetVoxels(voxels);
@@ -174,7 +174,7 @@ TEST_F(RapidSenseTestFixture, RecordPlaybackTest) {
   //  loop_rate.sleep();
   // }
 
-  imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
+  imgin = proxy_.GetFrame("voxel_stream", "", frame_type, 0.5, 1.0);
   voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
   voxels.clear();
   voxel_ptr->GetVoxels(voxels);
@@ -184,7 +184,7 @@ TEST_F(RapidSenseTestFixture, RecordPlaybackTest) {
   //   loop_rate.sleep();
   // }
 
-  imgin = proxy_.GetFrame(robot_name, "", frame_type, 0.5, 1.0);
+  imgin = proxy_.GetFrame("voxel_stream", "", frame_type, 0.5, 1.0);
   voxel_ptr = SensorFrameVoxels::CastConstPtr(imgin);
   voxels.clear();
   voxel_ptr->GetVoxels(voxels);
