@@ -41,7 +41,7 @@ void InitRosRobotObserver(ros::NodeHandle& nh, const RapidPlanProject::Ptr proje
   std::thread publish_thread([&]() {
     while (!cancel) {
       joint_pub.publish(CreateJointStateMessage(Vec(6, 0.f)));
-      status_pub.publish(CreateRobotStatusMessage(RobotManagerInterface::State::CONNECTED, ""));
+      status_pub.publish(CreateRobotStatusMessage(robot_manager::State::kConnected, ""));
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   });
@@ -100,7 +100,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
 
   // refresh spinner until at current joint config
   rtr_control_ros::RobotStatus status_msg1 =
-      CreateRobotStatusMessage(RobotManagerInterface::State::DISCONNECTED, "");
+      CreateRobotStatusMessage(robot_manager::State::kInitialized, "");
   status_pub.publish(status_msg1);
   while (observer->GetRobotStatus() != status_msg1.state) {
     ros::spinOnce();
@@ -108,7 +108,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
 
   // publish robot status
   rtr_control_ros::RobotStatus status_msg2 =
-      CreateRobotStatusMessage(RobotManagerInterface::State::CONNECTED, "");
+      CreateRobotStatusMessage(robot_manager::State::kConnected, "");
   status_pub.publish(status_msg2);
 
   // check that they are received and returned properly
@@ -119,7 +119,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
 
   // check that the status callback functionality works
   rtr_control_ros::RobotStatus status_msg3 =
-      CreateRobotStatusMessage(RobotManagerInterface::State::ERROR, "state string");
+      CreateRobotStatusMessage(robot_manager::State::kDisconnecting, "state string");
   observer->AddRobotStatusChangedCallback(
       [&](const int old_status, const int current_status, const std::string& state_str) {
         EXPECT_EQ(old_status, status_msg2.state);
@@ -134,7 +134,7 @@ TEST(RosRobotObserverTest, ROSTopics) {
   // check that the status callback is removed
   observer->RemoveRobotStatusChangedCallback();
   rtr_control_ros::RobotStatus status_msg4 =
-      CreateRobotStatusMessage(RobotManagerInterface::State::DISCONNECTED, "");
+      CreateRobotStatusMessage(robot_manager::State::kInitialized, "");
   status_pub.publish(status_msg4);
 
   // check that the status is still received correctly
@@ -157,7 +157,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   // Create RosController
   RosController::Ptr controller = CreateRosController(robot_type, config.safe_name);
   ASSERT_TRUE(controller);
-  EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::DISCONNECTED);
+  EXPECT_EQ(controller->GetDetailedState().state, robot_manager::State::kConnected);
 
   // Create RosRobotProxy
   RobotProxy::Ptr proxy = RobotProxy::MakePtr();
@@ -165,7 +165,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
 
   //// Test SetupRTR
   EXPECT_TRUE(proxy->SetupRTR());
-  EXPECT_EQ(controller->GetDetailedState().state, RobotManagerInterface::State::CONNECTED);
+  EXPECT_EQ(controller->GetDetailedState().state, robot_manager::State::kConnected);
 
   //// Test AcquireControl
   EXPECT_TRUE(proxy->AcquireControl());
@@ -173,7 +173,7 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   // interface will be active). Still waiting to hear back from robotics team on
   // this, but it seems like they're in the middle of a refactor
   // EXPECT_EQ(controller->GetDetailedState().state,
-  // RobotManagerInterface::State::ACTIVE);
+  // robot_manager::State::ACTIVE);
   EXPECT_FALSE(controller->HasError());
 
   //// Test moving the robot

@@ -152,7 +152,10 @@ TEST(SensorFrameTest, SensorFameVoxelsAndRobotFiltering) {
       SensorFrameVoxels::CastConstPtr(filter.GetFilteredNow(voxel_frame));
   output->GetVoxels(voxels, VoxelCluster::Label::OBSTACLE);
   EXPECT_TRUE(voxels.empty());
-  EXPECT_EQ(observer->GetStateSpace(), output->GetStateSpace());
+  EXPECT_TRUE(output->GetStateSpaces().count(observer->GetName()));
+  if (output->GetStateSpaces().count(observer->GetName())) {
+    EXPECT_EQ(output->GetStateSpaces().at(observer->GetName()), (observer->GetStateSpace()));
+  }
   EXPECT_EQ(output->GetMaxClusterId(), 0);
 }
 

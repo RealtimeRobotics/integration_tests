@@ -55,7 +55,10 @@ TEST(RobotGridFilter, Filtering) {
       SensorFrameVoxels::CastConstPtr(filter.GetFilteredNow(voxel_frame));
   output->GetVoxels(voxels);
   EXPECT_TRUE(voxels.empty());
-  EXPECT_EQ(observer->GetStateSpace(), output->GetStateSpace());
+  EXPECT_TRUE(output->GetStateSpaces().count(observer->GetName()));
+  if (output->GetStateSpaces().count(observer->GetName())) {
+    EXPECT_EQ(output->GetStateSpaces().at(observer->GetName()), (observer->GetStateSpace()));
+  }
 
   //// Test that GetFiltered also filters correctly
   if (!getenv("RS_DISABLE_FLAKYTESTS")) {
@@ -67,7 +70,10 @@ TEST(RobotGridFilter, Filtering) {
     output = SensorFrameVoxels::CastConstPtr(filter.GetFiltered(voxel_frame));
     output->GetVoxels(voxels);
     EXPECT_TRUE(voxels.empty());
-    EXPECT_EQ(observer->GetStateSpace(), output->GetStateSpace());
+    EXPECT_TRUE(output->GetStateSpaces().count(observer->GetName()));
+    if (output->GetStateSpaces().count(observer->GetName())) {
+      EXPECT_EQ(output->GetStateSpaces().at(observer->GetName()), (observer->GetStateSpace()));
+    }
   } else {
     RTR_INFO("Skipping timing dependent test in RobotClusterFilter::GetFiltered");
   }
@@ -103,7 +109,10 @@ TEST(RobotClusterFilter, Filtering) {
       SensorFrameVoxels::CastConstPtr(filter.GetFilteredNow(voxel_frame));
   output->GetVoxels(voxels, VoxelCluster::Label::OBSTACLE);
   EXPECT_TRUE(voxels.empty());
-  EXPECT_EQ(observer->GetStateSpace(), output->GetStateSpace());
+  EXPECT_TRUE(output->GetStateSpaces().count(observer->GetName()));
+  if (output->GetStateSpaces().count(observer->GetName())) {
+    EXPECT_EQ(output->GetStateSpaces().at(observer->GetName()), (observer->GetStateSpace()));
+  }
 
   //// Test that noisy clusters are filtered out
   voxels.clear();
@@ -159,7 +168,10 @@ TEST(RobotClusterFilter, Filtering) {
     output = SensorFrameVoxels::CastConstPtr(filter.GetFiltered(voxel_frame));
     output->GetVoxels(voxels);
     EXPECT_TRUE(voxels.empty());
-    EXPECT_EQ(observer->GetStateSpace(), output->GetStateSpace());
+    EXPECT_TRUE(output->GetStateSpaces().count(observer->GetName()));
+    if (output->GetStateSpaces().count(observer->GetName())) {
+      EXPECT_EQ(output->GetStateSpaces().at(observer->GetName()), (observer->GetStateSpace()));
+    }
   } else {
     RTR_INFO("Skipping timing dependent test in RobotClusterFilter::GetFiltered");
   }

@@ -8,6 +8,8 @@
 #include <rtr_control_ros/RosController.hpp>
 #include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
 #include <rtr_perc_spatial/PerceptionTestUtils.hpp>
+#include <rtr_robots/RobotInterfaceFactory.hpp>
+#include <rtr_utils/Converter.hpp>
 #include <rtr_utils/Environment.hpp>
 
 sensor_msgs::JointState CreateJointStateMessage(const rtr::JointConfiguration& config) {
@@ -22,7 +24,7 @@ sensor_msgs::JointState CreateJointStateMessage(const rtr::JointConfiguration& c
   return joint_msg;
 }
 
-rtr_control_ros::RobotStatus CreateRobotStatusMessage(const rtr::RobotManagerInterface::State state,
+rtr_control_ros::RobotStatus CreateRobotStatusMessage(const rtr::robot_manager::State state,
                                                       const std::string& state_str) {
   rtr_control_ros::RobotStatus status_msg;
   status_msg.state = static_cast<int>(state);
@@ -35,11 +37,14 @@ rtr::RosController::Ptr CreateRosController(const std::string& robot_type,
   rtr::RosController::Config config;
   rtr::perception::testutils::GetRobotPathInfo(robot_type, config.urdf_path, config.base_link,
                                                config.end_effector_link);
-  EXPECT_TRUE(rtr::GetDefaultParamJSONString(robot_type, config.robot_params));
+  auto rif = rtr::RobotInterfaceFactory::getInstance();
+  auto params = rif->GetDefaultPluginParameters(robot_type);
+  EXPECT_NE(boost::none, params);
+  config.robot_params = rtr::Convert<nlohmann::json>(params.value()).dump();
   config.robot_type = robot_type;
   config.ros_package_path = rtr::utils::ROS_PACKAGE_PATH;
   config.has_gripper = false;
-  config.connection_type = rtr::RobotManagerInterface::ConnectionType::kInternalSim;
+  config.connection_type = rtr::robot_manager::ConnectionType::kInternalSim;
   config.stopping_speed_factor = 1.f;
   config.velocity_factors = rtr::Vec(6, 1.f);
   config.acceleration_factors = rtr::Vec(6, 1.f);
