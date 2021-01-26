@@ -18,7 +18,12 @@
 #shift "$((${OPTIND} - 1))"
 
 get_test_packages() {
+    local disabled_tests=(reg_test_calibration)
     local packages1="$(catkin list | grep 'unit_test\|integ_test\|reg_test' | sed 's/- / /g' | tr -d '\n')"
+    for test_pkg in ${disabled_tests}
+    do
+        local packages1="$(echo $packages1 | sed "s/ $test_pkg / /g")"
+    done
     local  __resultvar=$1
     eval $__resultvar="'$packages1'"
 }
@@ -32,6 +37,13 @@ get_build_dir() {
 
 # pass 0 to disable_flakes and 1 to run them
 run_perc_tests() {
+
+    if [ -z "$RTR_PERCEPTION_TEST_DATA_ROOT" ]
+    then
+      echo "Missing rapidsense_testdata directory! Please set RTR_PERCEPTION_TEST_DATA_ROOT"
+      return
+    fi
+
     local disable_flakes=$1
     get_test_packages packages
     echo "Running tests from the following packages: ${packages}"

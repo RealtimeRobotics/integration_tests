@@ -4,9 +4,9 @@
 
 #include <nlohmann-json/json.hpp>
 
-#include <rtr_msgs/ClearApplianceFaults.h>
-#include <rtr_msgs/DeconGroup.h>
-#include <rtr_msgs/DeleteProject.h>
+#include <rtr_msgs/ClearApplianceFaultsAction.h>
+#include <rtr_msgs/DeconGroupAction.h>
+#include <rtr_msgs/DeleteProjectAction.h>
 #include <rtr_msgs/EnterCalibrationMode.h>
 #include <rtr_msgs/ExitCalibrationMode.h>
 #include <rtr_msgs/GetAllResultCodes.h>
@@ -18,14 +18,14 @@
 #include <rtr_msgs/GetProjectList.h>
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_msgs/GetVisionEnabled.h>
-#include <rtr_msgs/GroupProject.h>
-#include <rtr_msgs/InstallProject.h>
+#include <rtr_msgs/GroupProjectAction.h>
+#include <rtr_msgs/InstallProjectAction.h>
 #include <rtr_msgs/LoadedProjectInfo.h>
-#include <rtr_msgs/SetEULAAccepted.h>
+#include <rtr_msgs/SetEULAAcceptedAction.h>
 #include <rtr_msgs/SetVisionEnabled.h>
 #include <rtr_msgs/TeleportRobot.h>
-#include <rtr_msgs/UpdateGroup.h>
-#include <rtr_msgs/UpdateProject.h>
+#include <rtr_msgs/UpdateGroupAction.h>
+#include <rtr_msgs/UpdateProjectAction.h>
 #include <rtr_msgs/Version.h>
 #include <rtr_utils/Logging.hpp>
 
@@ -33,15 +33,15 @@ namespace rtr {
 
 ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
     : ApplianceCommander("127.0.0.1"), nh_(nh) {
-  rtr_msgs::SetEULAAccepted srv;
-  srv.request.signature = "unittest";
-  CallRosService<rtr_msgs::SetEULAAccepted>(nh_, srv, "/SetEULAAccepted");
+  rtr_msgs::SetEULAAcceptedGoal goal;
+  goal.signature = "unittest";
+  CallRosAction<rtr_msgs::SetEULAAcceptedAction>("/SetEULAAccepted", goal);
 }
 
 bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
-  rtr_msgs::InstallProject srv;
-  srv.request.zip_file_path = project_zip;
-  if (!CallRosService<rtr_msgs::InstallProject>(nh_, srv, "/InstallProject")) {
+  rtr_msgs::InstallProjectGoal goal;
+  goal.zip_file_path = project_zip;
+  if (!CallRosAction<rtr_msgs::InstallProjectAction>("/InstallNewProject", goal)) {
     return false;
   }
   return true;
@@ -59,9 +59,9 @@ bool ApplianceTestHelper::GetInstalledProjects(std::vector<std::string>& project
 
 bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group_name) {
   // Create the decon group
-  rtr_msgs::DeconGroup msg_grp;
-  msg_grp.request.group_name = dc_group_name;
-  if (!CallRosService<rtr_msgs::DeconGroup>(nh_, msg_grp, "/CreateGroup")) {
+  rtr_msgs::DeconGroupGoal grp_goal;
+  grp_goal.group_name = dc_group_name;
+  if (!CallRosAction<rtr_msgs::DeconGroupAction>("/CreateGroup", grp_goal)) {
     return false;
   }
 
@@ -73,20 +73,19 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group
 
   // Add all installed projects to the decon group
   for (const auto& P : projects) {
-    rtr_msgs::GroupProject msg_add_prj;
-    msg_add_prj.request.group_name = dc_group_name;
-    msg_add_prj.request.project_name = P;
-    if (!CallRosService<rtr_msgs::GroupProject>(nh_, msg_add_prj, "/AddProjectToGroup")) {
+    rtr_msgs::GroupProjectGoal msg_add_prj;
+    msg_add_prj.group_name = dc_group_name;
+    msg_add_prj.project_name = P;
+    if (!CallRosAction<rtr_msgs::GroupProjectAction>("/AddProjectToGroup", msg_add_prj)) {
       return false;
     }
   }
 
   // Set voxel region verified
-  rtr_msgs::UpdateGroup update_grp;
-  update_grp.request.group_name = dc_group_name;
-  update_grp.request.json_data = "{\"voxel_region_verified\":1}";
-  if (!CallRosService<rtr_msgs::UpdateGroup>(nh_, update_grp, "/UpdateGroup")
-      && update_grp.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+  rtr_msgs::UpdateGroupGoal update_grp;
+  update_grp.group_name = dc_group_name;
+  update_grp.json_data = "{\"voxel_region_verified\":1}";
+  if (!CallRosActionWithResultCheck<rtr_msgs::UpdateGroupAction>("/UpdateGroup", update_grp)) {
     return false;
   }
 
@@ -105,9 +104,9 @@ bool ApplianceTestHelper::SetVisionEnabled(const std::string& dc_group_name, boo
 }
 
 bool ApplianceTestHelper::LoadGroup(const std::string& dc_group_name) {
-  rtr_msgs::DeconGroup srv;
-  srv.request.group_name = dc_group_name;
-  if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/LoadGroup")) {
+  rtr_msgs::DeconGroupGoal goal;
+  goal.group_name = dc_group_name;
+  if (!CallRosAction<rtr_msgs::DeconGroupAction>("/LoadGroup", goal)) {
     return false;
   }
 
@@ -115,9 +114,9 @@ bool ApplianceTestHelper::LoadGroup(const std::string& dc_group_name) {
 }
 
 bool ApplianceTestHelper::UnloadGroup(const std::string& dc_group_name) {
-  rtr_msgs::DeconGroup srv;
-  srv.request.group_name = dc_group_name;
-  if (!CallRosService<rtr_msgs::DeconGroup>(nh_, srv, "/UnloadGroup")) {
+  rtr_msgs::DeconGroupGoal goal;
+  goal.group_name = dc_group_name;
+  if (!CallRosAction<rtr_msgs::DeconGroupAction>("/UnloadGroup", goal)) {
     return false;
   }
 
@@ -131,11 +130,10 @@ bool ApplianceTestHelper::SetProjectRobotParam(const std::string& prj_name,
   nlohmann::json j = nlohmann::json::parse(ifs);
 
   // Update Project Info
-  rtr_msgs::UpdateProject srv;
-  srv.request.project_name = prj_name;
-  srv.request.json_data = j.dump();
-  if (!CallRosService<rtr_msgs::UpdateProject>(nh_, srv, "/UpdateProject")
-      || srv.response.result_code != 0) {
+  rtr_msgs::UpdateProjectGoal goal;
+  goal.project_name = prj_name;
+  goal.json_data = j.dump();
+  if (!CallRosActionWithResultCheck<rtr_msgs::UpdateProjectAction>("/UpdateProject", goal)) {
     RTR_WARN("Could not update project {} with params: {}", prj_name, j.dump());
     return false;
   }
@@ -167,24 +165,21 @@ bool ApplianceTestHelper::ClearApplianceDatabase() {
 
   for (const auto& group : info_srv.response.groups) {
     for (const auto& project : group.projects) {
-      rtr_msgs::GroupProject remove_srv;
-      remove_srv.request.group_name = group.GroupName;
-      remove_srv.request.project_name = project;
-      if (!CallRosService<rtr_msgs::GroupProject>(nh_, remove_srv, "/RemoveProjectFromGroup")
-          || remove_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+      rtr_msgs::GroupProjectGoal remove_goal;
+      remove_goal.group_name = group.GroupName;
+      remove_goal.project_name = project;
+      if (!CallRosActionWithResultCheck<rtr_msgs::GroupProjectAction>("/RemoveProjectFromGroup", remove_goal)) {
         return false;
       }
-      rtr_msgs::DeleteProject delete_srv;
-      delete_srv.request.project_name = project;
-      if (!CallRosService<rtr_msgs::DeleteProject>(nh_, delete_srv, "/DeleteProject")
-          || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+      rtr_msgs::DeleteProjectGoal delete_goal;
+      delete_goal.project_name = project;
+      if (!CallRosActionWithResultCheck<rtr_msgs::DeleteProjectAction>("/DeleteProject", delete_goal)) {
         return false;
       }
     }
-    rtr_msgs::DeconGroup delete_srv;
-    delete_srv.request.group_name = group.GroupName;
-    if (!CallRosService<rtr_msgs::DeconGroup>(nh_, delete_srv, "/DeleteGroup")
-        || delete_srv.response.result_code != Convert<int>(ExtCode::SUCCESS)) {
+    rtr_msgs::DeconGroupGoal delete_goal;
+    delete_goal.group_name = group.GroupName;
+    if (!CallRosActionWithResultCheck<rtr_msgs::DeconGroupAction>("/DeleteGroup", delete_goal)) {
       return false;
     }
   }

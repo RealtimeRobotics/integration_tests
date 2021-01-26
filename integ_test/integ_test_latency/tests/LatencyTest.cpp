@@ -29,11 +29,12 @@ namespace bfs = boost::filesystem;
 // This test only runs for recordings around 15 seconds
 // This test only support cameras of the type INTEL_REALSENSE_D435
 
-#define ms_diff_threshold 25
-#define last_diff_threshold 45
-#define ms_diff_mean 12
+#define fuzzy_eval_eps 5
+#define ms_diff_threshold 25 + fuzzy_eval_eps
+#define last_diff_threshold 45 + fuzzy_eval_eps
+#define ms_diff_mean 12 + fuzzy_eval_eps
 #define ms_diff_std 0.045
-#define last_diff_mean 29
+#define last_diff_mean 29 + fuzzy_eval_eps
 #define last_diff_std 0.050
 
 class LatencyTestFixture : public ::testing::Test {

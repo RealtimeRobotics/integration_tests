@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include <actionlib/client/simple_action_client.h>
 #include <gtest/gtest.h>
 #include <ros/node_handle.h>
 #include <ros/ros.h>
@@ -12,6 +13,61 @@
 #include <rtr_utils/Logging.hpp>
 
 namespace rtr {
+
+//! @brief call ros service and check response
+template <typename ActionType, typename GoalType>
+bool CallRosAction(const std::string& action_name, const GoalType& goal) {
+  actionlib::SimpleActionClient<ActionType> client(action_name, true);
+  if (!client.waitForServer(ros::Duration(30.0))) {
+    RTR_ERROR("Failed to call {}. Action server does not exist", action_name);
+    return false;
+  }
+
+  actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+    RTR_ERROR("Failed to call {}", action_name);
+    return false;
+  }
+  RTR_DEBUG("Successfully called {}", action_name);
+  return true;
+}
+
+//! @brief call ros service and check response
+template <typename ActionType, typename GoalType, typename ResultType>
+bool CallRosAction(const std::string& action_name, const GoalType& goal, ResultType& result) {
+  actionlib::SimpleActionClient<ActionType> client(action_name, true);
+  if (!client.waitForServer(ros::Duration(30.0))) {
+    RTR_ERROR("Failed to call {}. Action server does not exist", action_name);
+    return false;
+  }
+
+  actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+    RTR_ERROR("Failed to call {}", action_name);
+    return false;
+  }
+  result = *client.getResult();
+  RTR_DEBUG("Successfully called {}", action_name);
+  return true;
+}
+
+//! @brief call ros service and check response
+template <typename ActionType, typename GoalType>
+bool CallRosActionWithResultCheck(const std::string& action_name, const GoalType& goal) {
+  actionlib::SimpleActionClient<ActionType> client(action_name, true);
+  if (!client.waitForServer(ros::Duration(30.0))) {
+    RTR_ERROR("Failed to call {}. Action server does not exist", action_name);
+    return false;
+  }
+
+  actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+    RTR_ERROR("Failed to call {}", action_name);
+    return true;
+  }
+  RTR_DEBUG("Successfully called {}", action_name);
+  return client.getResult()->result_code == Convert<int>(ExtCode::SUCCESS);
+}
 
 //! @brief call ros service and check response
 template <typename MessageType>
