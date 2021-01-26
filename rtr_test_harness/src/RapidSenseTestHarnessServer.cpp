@@ -12,6 +12,7 @@
 #include <rtr_perc_rapidsense_ros/RosRobotConnection.hpp>
 #include <rtr_utils/Backtrace.hpp>
 #include <rtr_utils/Logging.hpp>
+#include <rtr_utils/time/Timer.hpp>
 #include <rtr_voxelize/VoxelizerFactory.hpp>
 
 namespace bfs = boost::filesystem;
@@ -33,8 +34,15 @@ bool RapidSenseTestHarnessServer::StartServer(const std::string& app_dir) {
   InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
   const bfs::path appl_path = app_dir + "/appliance_data";
   boost::system::error_code ec;
-  if (!bfs::exists(appl_path, ec) || ec != nullptr) {
-    bfs::create_directory(appl_path, ec);
+
+  // wait for appliance to create directory structure
+  rtr::Timer timer(true);
+  while (timer.Elapsed() < 30.0 && (!bfs::exists(appl_path, ec) || ec != nullptr)) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(15));
+  }
+  if (!bfs::exists(appl_path)) {
+    RTR_ERROR("Timed out waiting for Appliance to create directory structure");
+    return false;
   }
 
   spinner_.start();

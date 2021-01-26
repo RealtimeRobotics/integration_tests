@@ -42,7 +42,7 @@ bool TestStartStopSensors(const std::set<std::string>& sensors, const SelectedFr
       RTR_ERROR(
           "Failed to start and stop sensors. Attempting to recover "
           "malfunctioning devices");
-      EXPECT_FALSE(SensorManager::getInstance()->RecoverMalfunctioningDevices().empty());
+      EXPECT_FALSE(SensorManager::getInstance()->RecoverMalfunctioningDevices(false).empty());
       EXPECT_TRUE(SensorManager::getInstance()->connect(sensors));
       return StartStopSensors(sensors, types);
     } else {

@@ -37,8 +37,7 @@ int main(int argc, char** argv) {
 
   ros::init(argc, argv, "RecordPlaybackSimTest");
   RapidSenseTestHarnessServer server;
-  std::string rs_path = ros::package::getPath("reg_test_record_playback") + "/../../test_data";
-  if (!server.SetUpSim(rs_path)) {
+  if (!server.SetUpSim(appliance_dir)) {
     RTR_ERROR("Failed to setup test server");
     return EXIT_FAILURE;
   }

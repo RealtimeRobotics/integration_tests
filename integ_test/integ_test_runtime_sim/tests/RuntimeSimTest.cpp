@@ -38,8 +38,7 @@ int main(int argc, char** argv) {
   RapidSenseTestHarnessServer server;
 
   ::testing::InitGoogleTest(&argc, argv);
-  std::string rs_path = ros::package::getPath("integ_test_runtime_sim") + "/../../test_data";
-  if (!server.SetUpSim(rs_path)) {
+  if (!server.SetUpSim(appliance_dir)) {
     RTR_ERROR("Failed to setup test server");
     return EXIT_FAILURE;
   }

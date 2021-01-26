@@ -45,11 +45,23 @@ class LatencyTestFixture : public ::testing::Test {
   std::string decon_group_name, robot_name, project, rapidsense_data, records;
 
   void SetUp() override {
+    // wait for appliance and rs server
+    if (!ros::topic::waitForMessage<std_msgs::String>("/appliance_state", ros::Duration(30))) {
+      RTR_ERROR("Timed out waiting for appliance");
+      return;
+    }
+    if (!ros::topic::waitForMessage<rtr_msgs::SchemaMessage>("/rapidsense/health",
+                                                             ros::Duration(30))) {
+      RTR_ERROR("Timed out waiting for RapidSense server");
+      return;
+    }
+
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_latency_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("project", project, "../../");
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
     nh_.param<std::string>("recordings", records, "../../");
+
 
     std::string TestPath = std::getenv("RTR_PERCEPTION_TEST_DATA_ROOT");
     RTR_INFO(
