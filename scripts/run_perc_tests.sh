@@ -29,14 +29,14 @@ get_test_packages() {
 }
 
 download_data() {
-  if [ -z "$RTR_PERCEPTION_TEST_DATA_ROOT" ]
+if [ -z "$RTR_PERCEPTION_TEST_DATA_ROOT" ]
     then
     echo "Missing rapidsense_testdata directory! Creating RTR_PERCEPTION_TEST_DATA_ROOT at ~/rtr-nas/"
-    export RTR_PERCEPTION_TEST_DATA_ROOT=~/rtr-nas/rapidsense_testdata
-    mkdir -p $RTR_PERCEPTION_TEST_DATA_ROOT
+    export RTR_PERCEPTION_TEST_DATA_ROOT=~/rtr-nas/
+    mkdir -p $RTR_PERCEPTION_TEST_DATA_ROOT/rapidsense_testdata
   fi
   echo 'Copying Data from rtr-nas.realtime.cxm'
-  scp -r perception@rtr-nas.realtime.cxm:/volume1/rapidsense_testdata/* $RTR_PERCEPTION_TEST_DATA_ROOT/
+  scp -r perception@rtr-nas.realtime.cxm:/volume1/rapidsense_testdata/* $RTR_PERCEPTION_TEST_DATA_ROOT/rapidsense_testdata/
 }
 
 ################################################################################
