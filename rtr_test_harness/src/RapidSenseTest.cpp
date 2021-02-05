@@ -2,7 +2,6 @@
 
 #include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_control_ros/RosController.hpp>
-#include <rtr_msgs/FollowJointPathAction.h>
 #include <rtr_msgs/GetGroupInfo.h>
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
@@ -11,11 +10,7 @@
 
 using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 
-namespace rtr {
-
-// ROSCommanderInterface Topics
-static const std::string kFollowJointPathTopic = "/FollowJointPath";
-  
+namespace rtr {  
 namespace perception {
 
 RapidSenseTest::RapidSenseTest()
@@ -275,7 +270,6 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
 }
 
 bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_sequence) {
-  // bool no_interrupts = true;
   std::atomic_int hub_idx(1);
 
   ExtCodeSeqPair pair;
