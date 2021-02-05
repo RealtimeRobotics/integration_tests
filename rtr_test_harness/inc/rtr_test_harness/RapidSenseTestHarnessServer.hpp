@@ -11,7 +11,6 @@
 
 #include <rtr_appliance/Appliance.hpp>
 #include <rtr_appliance/ApplianceExternalInterfaceCodes.hpp>
-#include <rtr_control_ros/FollowJointPathAction.h>
 #include <rtr_msgs/DeconGroupInfo.h>
 #include <rtr_msgs/GetSchemaMessage.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseDefs.hpp>
