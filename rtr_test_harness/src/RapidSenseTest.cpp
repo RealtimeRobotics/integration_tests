@@ -10,7 +10,7 @@
 
 using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 
-namespace rtr {  
+namespace rtr {
 namespace perception {
 
 RapidSenseTest::RapidSenseTest()
