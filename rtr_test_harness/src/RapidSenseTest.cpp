@@ -2,6 +2,7 @@
 
 #include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_control_ros/RosController.hpp>
+#include <rtr_msgs/FollowJointPathAction.h>
 #include <rtr_msgs/GetGroupInfo.h>
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
@@ -13,6 +14,8 @@ using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 namespace rtr {
 namespace perception {
 
+  static const std::string kFollowJointPathTopic = "/FollowJointPath";
+  
 RapidSenseTest::RapidSenseTest()
     : nh_(""), app_commander_("127.0.0.1"), proxy_(RapidSenseFrontEndProxy::MakePtr()) {}
 
@@ -270,6 +273,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
 }
 
 bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_sequence) {
+  bool no_interrupts = true;
   std::atomic_int hub_idx(1);
 
   ExtCodeSeqPair pair;
@@ -283,6 +287,7 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
 
   // subscribe to path and joint states - this is ugly, maybe we can find a
   // better way to do this
+  std::vector<ros::Subscriber> result_subs;
   std::vector<ros::Subscriber> js_subs;
 
   for (const auto& observer : observers_) {
@@ -295,6 +300,16 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
     };
     js_subs.push_back(
         nh_.subscribe<sensor_msgs::JointState>(names.joint_states, 10, buffer_latest_js));
+
+    // TODO (brian): FollowJointPath action does not contain error_code field anymore, although it
+    // can be added back if necessary auto check_for_interrupts =
+    //   [&no_interrupts](const rtr_msgs::FollowJointPathActionResult::ConstPtr& msg ) {
+    //     if (msg->result.error_code != 0) {
+    //       no_interrupts = false;
+    //     }
+    //     };
+    // result_subs.push_back(nh_.subscribe<rtr_msgs::FollowJointPathActionResult>(
+    //     kFollowJointPathTopic + "/result", 10, check_for_interrupts));
   }
 
   for (auto it = hub_sequence.begin() + 1; it != hub_sequence.end(); ++it) {
@@ -318,6 +333,13 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
   }
 
   js_subs.clear();
+  result_subs.clear();
+
+  if (!no_interrupts) {
+    RTR_ERROR("Test resulted in inconsistent path");
+    test_result_->result_ = RapidSenseTestResult::PATH_FAILURE;
+    return false;
+  }
 
   return true;
 }
