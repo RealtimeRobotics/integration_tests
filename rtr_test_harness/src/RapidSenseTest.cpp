@@ -2,6 +2,7 @@
 
 #include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_control_ros/RosController.hpp>
+#include <rtr_msgs/FollowJointPathAction.h>
 #include <rtr_msgs/GetGroupInfo.h>
 #include <rtr_msgs/GetProjectROSInfo.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
@@ -13,6 +14,8 @@ using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 namespace rtr {
 namespace perception {
 
+  static const std::string kFollowJointPathTopic = "/FollowJointPath";
+  
 RapidSenseTest::RapidSenseTest()
     : nh_(""), app_commander_("127.0.0.1"), proxy_(RapidSenseFrontEndProxy::MakePtr()) {}
 
@@ -284,8 +287,8 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
 
   // subscribe to path and joint states - this is ugly, maybe we can find a
   // better way to do this
-  std::vector<ros::Subscriber> js_subs, result_subs, feedback_subs;
-  std::vector<uint32_t> edge_indices;
+  std::vector<ros::Subscriber> result_subs;
+  std::vector<ros::Subscriber> js_subs;
 
   for (const auto& observer : observers_) {
     RosController::TopicNames names = RosController::GetTopicNames(observer->GetName());
@@ -298,35 +301,15 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
     js_subs.push_back(
         nh_.subscribe<sensor_msgs::JointState>(names.joint_states, 10, buffer_latest_js));
 
-    auto check_for_interrupts =
-        [&no_interrupts](const rtr_control_ros::FollowJointPathActionResult::ConstPtr& msg) {
-          if (msg->result.error_code != 0) {
-            no_interrupts = false;
-          }
-        };
-    result_subs.push_back(nh_.subscribe<rtr_control_ros::FollowJointPathActionResult>(
-        names.follow_joint_path + "/result", 10, check_for_interrupts));
-
-    // store approximation of key points in path
-    edge_indices.push_back(0);
-    uint32_t& old_edge_idx = edge_indices.back();
-    auto store_key_points =
-        [&old_edge_idx, &hub_idx, &hub_sequence,
-         buffer](const rtr_control_ros::FollowJointPathActionFeedback::ConstPtr& msg) {
-          if (msg->feedback.current_edgeid_idx != old_edge_idx) {
-            sensor_msgs::JointState js;
-            if (buffer->front(js)) {
-              JointConfiguration config(js.position.size());
-              for (size_t i = 0; i < config.Size(); ++i) {
-                config[i] = js.position[i];
-              }
-              hub_sequence[hub_idx].joint_configs.push_back(config);
-            }
-          }
-          old_edge_idx = msg->feedback.current_edgeid_idx;
-        };
-    feedback_subs.push_back(nh_.subscribe<rtr_control_ros::FollowJointPathActionFeedback>(
-        names.follow_joint_path + "/feedback", 1, store_key_points));
+    // TODO (brian): FollowJointPath action does not contain error_code field anymore, although it
+    // can be added back if necessary auto check_for_interrupts =
+    //   [&no_interrupts](const rtr_msgs::FollowJointPathActionResult::ConstPtr& msg ) {
+    //     if (msg->result.error_code != 0) {
+    //       no_interrupts = false;
+    //     }
+    //     };
+    // result_subs.push_back(nh_.subscribe<rtr_msgs::FollowJointPathActionResult>(
+    //     kFollowJointPathTopic + "/result", 10, check_for_interrupts));
   }
 
   for (auto it = hub_sequence.begin() + 1; it != hub_sequence.end(); ++it) {
@@ -349,7 +332,6 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
     hub_idx.fetch_add(1);
   }
 
-  feedback_subs.clear();
   js_subs.clear();
   result_subs.clear();
 
