@@ -30,8 +30,6 @@ const std::string appliance_dir = "/tmp/appliance_test";
 const std::string rapidsense_dir = "/tmp/rapidsense_test";
 
 int main(int argc, char** argv) {
-  bfs::remove_all(appliance_dir);
-  bfs::remove_all(rapidsense_dir);
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_playback_sim");
 
@@ -44,6 +42,7 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
 
+  server.Teardown();
   bfs::remove_all(appliance_dir);
   bfs::remove_all(rapidsense_dir);
   return res;

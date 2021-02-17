@@ -194,8 +194,6 @@ TEST_F(LatencyTestFixture, VerifyLatency) {
 }
 
 int main(int argc, char** argv) {
-  bfs::remove_all("/tmp/appliance_test");
-  bfs::remove_all("/tmp/rapidsense_test");
   QApplication app(argc, argv);
   QCoreApplication::setApplicationName("rapidsense_lat");
   ros::init(argc, argv, "LatencyTest");
