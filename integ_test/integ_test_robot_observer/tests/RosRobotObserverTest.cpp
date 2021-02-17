@@ -164,7 +164,6 @@ TEST(RosRobotProxyTest, RobotControllerInteractions) {
   InitRosRobotObserver(nh, project, proxy, config);
 
   //// Test SetupRTR
-  EXPECT_TRUE(proxy->SetupRTR());
   EXPECT_EQ(controller->GetDetailedState().state, robot_manager::State::kConnected);
 
   //// Test AcquireControl

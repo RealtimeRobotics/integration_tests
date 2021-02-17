@@ -28,15 +28,12 @@ const std::string appliance_dir = "/tmp/appliance_test";
 const std::string rapidsense_dir = "/tmp/rapidsense_test";
 
 int main(int argc, char** argv) {
-  bfs::remove_all(appliance_dir);
-  bfs::remove_all(rapidsense_dir);
-
   QApplication app(argc, argv);
-  QCoreApplication::setApplicationName("rapidsense");
+  QCoreApplication::setApplicationName("rapidsense_calibration");
 
   ros::init(argc, argv, "CalibrationTest");
   RapidSenseTestHarnessServer server;
-  if (!server.SetUpSim(appliance_dir)) {
+  if (!server.SetUp(appliance_dir)) {
     RTR_ERROR("Failed to setup test server");
     return EXIT_FAILURE;
   }
