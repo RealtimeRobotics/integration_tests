@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   bfs::remove_all(appliance_dir);
   bfs::remove_all(rapidsense_dir);
   QApplication app(argc, argv);
-  QCoreApplication::setApplicationName("rapidsense_sim");
+  QCoreApplication::setApplicationName("rapidsense_calibration_sim");
 
   ros::init(argc, argv, "CalibrationSimTest");
   RapidSenseTestHarnessServer server;
@@ -43,8 +43,6 @@ int main(int argc, char** argv) {
   int res = RUN_ALL_TESTS();
 
   server.Teardown();
-  // TODO Do not hard code. The appliance/rapidsense may end up using different
-  // directories during runtime.
   bfs::remove_all(appliance_dir);
   bfs::remove_all(rapidsense_dir);
   return res;

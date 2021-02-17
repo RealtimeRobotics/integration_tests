@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   bfs::remove_all(appliance_dir);
   bfs::remove_all(rapidsense_dir);
   QApplication app(argc, argv);
-  QCoreApplication::setApplicationName("rapidsense_sim");
+  QCoreApplication::setApplicationName("rapidsense_playback_sim");
 
   ros::init(argc, argv, "RecordPlaybackSimTest");
   RapidSenseTestHarnessServer server;
