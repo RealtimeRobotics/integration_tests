@@ -160,7 +160,7 @@ bool RapidSenseTest::Run(const bool use_live_data, const bool record_data) {
   // TODO: extend this to multirobot
   RapidSenseTestHubConfig hub_config = config_.hub_sequence.front();
   ExtCodeSeqPair pair = app_commander_.MoveToHub(hub_config.active_robot, hub_config.state_space,
-                                                 hub_config.hub_name, config_.speed);
+                                                 hub_config.hub_name, config_.speed, 0);
   res = pair.first;
   seq_num = pair.second;
   if (res == ExtCode::START_CONFIG_NOT_WITHIN_TOL_TO_ROADMAP) {
@@ -313,7 +313,7 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
   }
 
   for (auto it = hub_sequence.begin() + 1; it != hub_sequence.end(); ++it) {
-    pair = app_commander_.MoveToHub(it->active_robot, it->state_space, it->hub_name, config_.speed);
+    pair = app_commander_.MoveToHub(it->active_robot, it->state_space, it->hub_name, config_.speed, 0);
     res = pair.first;
     seq_num = pair.second;
     if (res != ExtCode::SUCCESS) {
