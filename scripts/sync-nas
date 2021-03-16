@@ -1,0 +1,109 @@
+#!/bin/sh
+
+set -euvx
+
+readonly this="$(readlink -f "$0")"
+readonly whatami="$(basename "${this}")"
+readonly whereami="${PWD}"
+
+readonly LOCAL_MOUNT_POINT="/mnt/NAS"
+readonly NAS_IP_ADDRESS="//10.164.2.108"
+readonly NAS_USER="perception"
+readonly NAS_PASSWORD="Realtime123"
+
+#readonly NAS_SRC_DIR="test-data"
+#readonly LOCAL_DST_DIR="/home/jenkins/build-test-perception/test-data"
+
+log() { echo "${whatami}[$$]: $*" >&2; }
+error() { log "ERROR: $*"; }
+warning() { log "WARNING: $*"; }
+info() { log "INFO: $*"; }
+
+die() {
+    error "$@"
+    exit 1
+}
+
+cleanup() {
+
+    # Need to unmount the NAS before exiting
+    if mountpoint -q $LOCAL_MOUNT_POINT ; then
+        log "Unmounting ${LOCAL_MOUNT_POINT}"
+        sudo umount $LOCAL_MOUNT_POINT
+    fi
+}
+trap cleanup EXIT
+trap cleanup INT  # SIGINT
+trap cleanup TERM # SIGTERM
+
+usage() {
+    cat <<EOF
+Usage: $0 <SRC_NAS_DIR> <DST_LOCAL_DIR>
+Rsync a local direcetory with one on the rtr NAS.
+The "cifs-utils" package must be installed beforehand.
+
+The rtr NAS can be accessed here: http://rtr-nas.realtime.cxm:5000/
+
+Examples:
+
+  \$ $0 test-data /home/rtr-user/Desktop/
+
+EOF
+}
+
+make_dir_exist() {
+    if [ ! -d $1 ]; then
+        info "[$1] dir does not exist, creating directory..."
+        sudo mkdir -p $1
+    else
+        info "[$1] dir exists"
+    fi
+}
+
+
+################################################################################
+
+while getopts ":h" opt; do
+    case "${opt}" in
+        h)
+            usage
+            exit 0
+            ;;
+        :) die "missing argument -${OPTARG}" ;;
+        \?) die "bad option: -${OPTARG}" ;;
+    esac
+done
+
+if [ "$#" -ne 2 ] || [ -z "$1" ] || [ -z "$2" ] ; then
+    warning "Improper arugments, please check usage..."
+    usage
+    exit 1
+else
+    readonly NAS_SRC_DIR="$1"
+    readonly LOCAL_DST_DIR="$2"
+    info "Rsync [$NAS_IP_ADDRESS/$NAS_SRC_DIR] to [$LOCAL_DST_DIR]"
+fi
+
+# Create the mounting point directory if it does not already exist
+make_dir_exist $LOCAL_MOUNT_POINT
+
+# Mount the NAS
+sudo mount -t cifs -o user=$NAS_USER,password=$NAS_PASSWORD \
+                            $NAS_IP_ADDRESS/$NAS_SRC_DIR \
+                            $LOCAL_MOUNT_POINT
+
+# Check if the mount point destination is now a mount point
+if ! mountpoint -q $LOCAL_MOUNT_POINT ; then
+    error "Failed to mount [$NAS_IP_ADDRESS/$NAS_SRC_DIR] to [$LOCAL_MOUNT_POINT]"
+    die
+fi
+
+# Create the local target directory if it does not exist. This is where the
+# test-data will live locally
+make_dir_exist $LOCAL_DST_DIR
+
+# rsync the NAS:test-data onto the LOCAL:test-data
+if ! sudo rsync -av $LOCAL_MOUNT_POINT $LOCAL_DST_DIR ; then
+    error "Failed to rsync [$LOCAL_MOUNT_POINT] to [$LOCAL_DST_DIR]"
+    die
+fi
