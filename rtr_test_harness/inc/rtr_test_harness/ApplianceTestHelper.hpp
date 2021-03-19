@@ -96,7 +96,7 @@ class ApplianceTestHelper : public ApplianceCommander {
   ApplianceTestHelper(ros::NodeHandle& nh);
 
   // @brief Install the project zip to appliance
-  bool InstallProject(const std::string& project_zip);
+  bool InstallProject(const std::string& zip_path);
 
   // @brief Get a list of projects currently installed onto the appliance
   bool GetInstalledProjects(std::vector<std::string>& projects);

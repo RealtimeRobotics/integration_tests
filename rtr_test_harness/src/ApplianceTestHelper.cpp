@@ -8,7 +8,6 @@
 #include <rtr_msgs/DeconGroupAction.h>
 #include <rtr_msgs/DeleteProjectAction.h>
 #include <rtr_msgs/EnterCalibrationMode.h>
-#include <rtr_msgs/ExitCalibrationMode.h>
 #include <rtr_msgs/GetAllResultCodes.h>
 #include <rtr_msgs/GetApplianceErrors.h>
 #include <rtr_msgs/GetApplianceState.h>
@@ -22,7 +21,6 @@
 #include <rtr_msgs/InstallProjectAction.h>
 #include <rtr_msgs/LoadedProjectInfo.h>
 #include <rtr_msgs/SetEULAAcceptedAction.h>
-#include <rtr_msgs/SetVisionEnabled.h>
 #include <rtr_msgs/TeleportRobot.h>
 #include <rtr_msgs/UpdateGroupAction.h>
 #include <rtr_msgs/UpdateProjectAction.h>
@@ -40,7 +38,7 @@ ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
 
 bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
   rtr_msgs::InstallProjectGoal goal;
-  goal.zip_file_path = project_zip;
+  goal.zip_file_path = zip_path;
   if (!CallRosAction<rtr_msgs::InstallProjectAction>("/InstallNewProject", goal)) {
     return false;
   }
@@ -92,16 +90,16 @@ bool ApplianceTestHelper::AddAllProjectsToDeconGroup(const std::string& dc_group
   return true;
 }
 
-bool ApplianceTestHelper::SetVisionEnabled(const std::string& dc_group_name, bool is_enabled) {
-  rtr_msgs::SetVisionEnabled srv;
-  srv.request.group_name = dc_group_name;
-  srv.request.enabled = is_enabled;
-  if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
-    return false;
-  }
+// bool ApplianceTestHelper::SetVisionEnabled(const std::string& dc_group_name, bool is_enabled) {
+  // rtr_msgs::SetVisionEnabled srv;
+  // srv.request.group_name = dc_group_name;
+  // srv.request.enabled = is_enabled;
+  // if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
+  //   return false;
+  // }
 
-  return true;
-}
+  // return true;
+// }
 
 bool ApplianceTestHelper::LoadGroup(const std::string& dc_group_name) {
   rtr_msgs::DeconGroupGoal goal;
