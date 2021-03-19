@@ -39,8 +39,8 @@ ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
 }
 
 bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
-  std::string extracted_path = '/tmp/' + FileName(zip_path);
-  Unzip(zip_path, extracted_path);
+  std::string extracted_path = "/tmp/" + FileName(zip_path);
+  zip::Unzip(zip_path, extracted_path);
 
   rtr::RapidPlanProject::Ptr prj;
   if (!prj->Load(extracted_path)) {
@@ -52,6 +52,41 @@ bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
   } else {
     RTR_WARN("Toolkit Project aready exists: {}", zip_path);
     return false;
+  }
+  return true;
+}
+
+bool ApplianceTestHelper::SetupDefault() {
+  for (const auto& prj : toolkit_projects_) {
+    if (!InstallProject(prj.first)) {
+      RTR_ERROR("Failed to install project {}", prj.first);
+      return false;
+    }
+
+    std::string robot_param_path = RemoveExtension(prj.first) + ".json";
+    if (!SetProjectRobotParam(prj.second->GetName(), robot_param_path)) {
+      RTR_ERROR("Failed to robot params {}", prj.first);
+      return false;
+    }
+  }
+
+  if (!AddAllProjectsToDeconGroup(kDefaultDeconGroupName)) {
+    RTR_ERROR("Failed add projects to decon group");
+    return false;
+  }
+
+  if (!LoadGroup(kDefaultDeconGroupName)) {
+    RTR_ERROR("Failed load group");
+    return false;
+  }
+
+  for (const auto& prj : toolkit_projects_) {
+    if(ExtCode::SUCCESS == InitGroup(kDefaultDeconGroupName,
+                                     prj.second->GetName(),
+                                     prj.second->GetStateSpaceNames()[0]) ) {
+      RTR_ERROR("Failed init group");
+      return false;
+    }
   }
   return true;
 }

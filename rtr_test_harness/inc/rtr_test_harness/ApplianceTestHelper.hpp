@@ -13,6 +13,8 @@
 #include <rtr_utils/Logging.hpp>
 #include <rtr_app_layer/RapidPlanProject.hpp>
 
+const std::string kDefaultDeconGroupName = "integration_test_group";
+
 namespace rtr {
 
 //! @brief call ros service and check response
@@ -98,6 +100,9 @@ class ApplianceTestHelper : public ApplianceCommander {
 
   // @brief Add Rapidplan project to be used with test
   bool AddToolkitProject(const std::string& zip_path);
+
+  // @brief Add Rapidplan project to be used with test
+  bool SetupDefault();
 
   // @brief Install the project zip to appliance
   bool InstallProject(const std::string& zip_path);
