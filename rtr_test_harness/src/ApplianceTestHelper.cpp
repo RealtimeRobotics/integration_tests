@@ -26,6 +26,8 @@
 #include <rtr_msgs/UpdateProjectAction.h>
 #include <rtr_msgs/Version.h>
 #include <rtr_utils/Logging.hpp>
+#include <rtr_utils/ZipUtils.hpp>
+#include <rtr_utils/Strings.hpp>
 
 namespace rtr {
 
@@ -36,7 +38,25 @@ ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
   CallRosAction<rtr_msgs::SetEULAAcceptedAction>("/SetEULAAccepted", goal);
 }
 
-bool ApplianceTestHelper::InstallProject(const std::string& project_zip) {
+bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
+  std::string extracted_path = '/tmp/' + FileName(zip_path);
+  Unzip(zip_path, extracted_path);
+
+  rtr::RapidPlanProject::Ptr prj;
+  if (!prj->Load(extracted_path)) {
+    RTR_WARN("Toolkit project failed to load {}", zip_path);
+  }
+
+  if (toolkit_projects_.find(zip_path) == toolkit_projects_.end()) {
+    toolkit_projects_.emplace(zip_path, prj);
+  } else {
+    RTR_WARN("Toolkit Project aready exists: {}", zip_path);
+    return false;
+  }
+  return true;
+}
+
+bool ApplianceTestHelper::InstallProject(const std::string& zip_path) {
   rtr_msgs::InstallProjectGoal goal;
   goal.zip_file_path = zip_path;
   if (!CallRosAction<rtr_msgs::InstallProjectAction>("/InstallNewProject", goal)) {

@@ -11,6 +11,7 @@
 #include <rtr_appliance/ApplianceCommander.hpp>
 #include <rtr_msgs/DeconGroupInfo.h>
 #include <rtr_utils/Logging.hpp>
+#include <rtr_app_layer/RapidPlanProject.hpp>
 
 namespace rtr {
 
@@ -95,6 +96,9 @@ class ApplianceTestHelper : public ApplianceCommander {
  public:
   ApplianceTestHelper(ros::NodeHandle& nh);
 
+  // @brief Add Rapidplan project to be used with test
+  bool AddToolkitProject(const std::string& zip_path);
+
   // @brief Install the project zip to appliance
   bool InstallProject(const std::string& zip_path);
 
@@ -130,6 +134,7 @@ class ApplianceTestHelper : public ApplianceCommander {
 
  protected:
   ros::NodeHandle nh_;
+  std::map<std::string, RapidPlanProject::Ptr> toolkit_projects_;
 };
 
 }  // namespace rtr

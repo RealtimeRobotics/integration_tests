@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   rtr_control_ros
   rtr_msgs
   rtr_appliance
+  rtr_app_layer
   rtr_perc_rapidsense
   rtr_perc_rapidsense_ros
   rtr_perc_sensors_ros
@@ -62,6 +63,7 @@ catkin_package(
     rtr_control_ros
     rtr_msgs
     rtr_appliance
+    rtr_app_layer
     rtr_perc_rapidsense
     rtr_perc_rapidsense_ros
     rtr_perc_sensors_ros
