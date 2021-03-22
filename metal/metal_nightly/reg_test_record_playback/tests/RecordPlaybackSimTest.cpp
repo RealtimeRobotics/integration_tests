@@ -70,11 +70,11 @@ class RapidSenseTestFixture : public ::testing::Test {
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
-    ASSERT_TRUE(appliance_.InstallProject(project));
-    ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
-    ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
-    ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
-    ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.InstallProject(project));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.SetProjectRobotParam("ur3", robot_param));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.AddAllProjectsToDeconGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.SetVisionEnabled(decon_group_name, true));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.LoadGroup(decon_group_name));
 
     std::string rapidsense_state_directory;
     if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {

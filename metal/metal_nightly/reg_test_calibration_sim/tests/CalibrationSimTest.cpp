@@ -81,12 +81,12 @@ class CalibrationTestFixture : public ::testing::Test {
         fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
     CopyFolder(rapidsense_data, rapidsense_data_directory);
 
-    ASSERT_TRUE(appliance_.ClearApplianceDatabase());
-    ASSERT_TRUE(appliance_.InstallProject(project));
-    ASSERT_TRUE(appliance_.SetProjectRobotParam("ur3", robot_param));
-    ASSERT_TRUE(appliance_.AddAllProjectsToDeconGroup(decon_group_name));
-    ASSERT_TRUE(appliance_.SetVisionEnabled(decon_group_name, true));
-    ASSERT_TRUE(appliance_.LoadGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.ClearApplianceDatabase());
+    ASSERT_TRUE(appliance_.webapp_cmdr_.InstallProject(project));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.SetProjectRobotParam("ur3", robot_param));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.AddAllProjectsToDeconGroup(decon_group_name));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.SetVisionEnabled(decon_group_name, true));
+    ASSERT_TRUE(appliance_.webapp_cmdr_.LoadGroup(decon_group_name));
 
     std_srvs::Trigger trg;
     CallRosService<std_srvs::Trigger>(nh_, trg, "/restart_sim");
@@ -134,7 +134,7 @@ TEST_F(CalibrationTestFixture, VerifyCailbrationWorkflowWithPreviousLoc) {
   EXPECT_TRUE(proxy_.AttachFiducialToActiveObserver());
 
   // Teleport to hub
-  EXPECT_TRUE(appliance_.TeleportToHub(active_observer, hub_name));
+  EXPECT_TRUE(appliance_.webapp_cmdr_.TeleportToHub(active_observer, hub_name));
 
   std::set<std::string> cameras_set = proxy_.GetConnectedSensors();
   std::vector<std::string> uids(cameras_set.begin(), cameras_set.end());
