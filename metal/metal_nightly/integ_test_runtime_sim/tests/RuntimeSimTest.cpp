@@ -86,7 +86,7 @@ class RuntimeSimTest : public ::testing::Test {
     CopyFolder(rapidsense_data, rapidsense_data_directory);
 
     // set up appliance data
-    ASSERT_TRUE(appliance_.ClearApplianceDatabase());
+    ASSERT_TRUE(appliance_.webapp_cmdr_.ClearApplianceDatabase());
     ASSERT_TRUE(appliance_.InstallProject(project));
     const std::string robot_param = ros::package::getPath("integ_test_runtime_sim")
                                     + "/../../test_data/ur3_runtime_test/ur3.json";
@@ -131,10 +131,10 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
   EXPECT_TRUE(appliance_.TeleportToHub(robot_name_, start_hub_name_));
 
   //// Test initializing appliance
-  EXPECT_EQ(appliance_.SetInterruptBehavior(robot_name_, 15, 5), ExtCode::SUCCESS);
-  EXPECT_EQ(appliance_.InitGroup(decon_group_name_, robot_name_, default_state_space_),
+  EXPECT_EQ(appliance_.appliance_commander_.SetInterruptBehavior(robot_name_, 15, 5), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.InitGroup(decon_group_name_, robot_name_, default_state_space_),
             ExtCode::SUCCESS);
-  EXPECT_EQ(appliance_.BeginOperationMode(), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.BeginOperationMode(), ExtCode::SUCCESS);
 
   // record first config
   const std::vector<RobotObserver::Ptr> observers = proxy_.GetObservers();
@@ -144,18 +144,18 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
 
   //// Test move to hub
   ApplianceCommander::ExtCodeSeqPair res_pair =
-      appliance_.MoveToHub(robot_name_, default_state_space_, target_hub_name_, 0.8f);
+      appliance_.appliance_commander_.MoveToHub(robot_name_, default_state_space_, target_hub_name_, 0.8f);
   EXPECT_EQ(res_pair.first, ExtCode::SUCCESS);
-  EXPECT_EQ(appliance_.WaitForMove(res_pair.second), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.WaitForMove(res_pair.second), ExtCode::SUCCESS);
 
   // double check that we actually moved
   JointConfiguration curr_config = observer->GetCurrentJointConfiguration();
   EXPECT_FALSE(first_config.FuzzyEquals(curr_config, 0.01));
 
   // move back to start configuration
-  res_pair = appliance_.MoveToHub(robot_name_, default_state_space_, start_hub_name_, 0.8f);
+  res_pair = appliance_.appliance_commander_.MoveToHub(robot_name_, default_state_space_, start_hub_name_, 0.8f);
   EXPECT_EQ(res_pair.first, ExtCode::SUCCESS);
-  EXPECT_EQ(appliance_.WaitForMove(res_pair.second), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.WaitForMove(res_pair.second), ExtCode::SUCCESS);
 
   // double check that we actually moved
   curr_config = observer->GetCurrentJointConfiguration();
@@ -172,7 +172,7 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
     EXPECT_EQ(state_spaces[observer->GetName()],
               observer->GetStateSpaceUUIDFromName(default_state_space_));
   }
-  EXPECT_EQ(appliance_.ChangeWorkspace(robot_name_, other_state_space_), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.ChangeWorkspace(robot_name_, other_state_space_), ExtCode::SUCCESS);
   frame = proxy_.GetFrame("voxel_stream", "", ft, 0.5, 0.5);
   EXPECT_TRUE(frame);
   if (frame) {
@@ -184,6 +184,6 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
   }
 
   // shutdown
-  EXPECT_EQ(appliance_.EndOperationMode(), ExtCode::SUCCESS);
-  EXPECT_EQ(appliance_.TerminateGroup(decon_group_name_), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.EndOperationMode(), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.appliance_commander_.TerminateGroup(decon_group_name_), ExtCode::SUCCESS);
 }

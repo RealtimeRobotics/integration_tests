@@ -111,6 +111,7 @@ set(INC
   inc/${PROJECT_NAME}/RapidSenseTestConfigs.hpp
   inc/${PROJECT_NAME}/RapidSenseTest.hpp
   inc/${PROJECT_NAME}/RapidSenseTestHelper.hpp
+  inc/${PROJECT_NAME}/WebappCommander.hpp
 )
 
 set(SRC
@@ -119,6 +120,7 @@ set(SRC
   src/RapidSenseTest.cpp
   src/RapidSenseTestHelper.cpp
   src/RapidSenseTestConfigs.cpp
+  src/WebappCommander.cpp
 )
 
 #set(RES resources/resources.qrc )
