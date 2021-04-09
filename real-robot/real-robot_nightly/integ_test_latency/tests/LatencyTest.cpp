@@ -62,7 +62,6 @@ class LatencyTestFixture : public ::testing::Test {
     nh_.param<std::string>("rapidsense_data", rapidsense_data, "../../");
     nh_.param<std::string>("recordings", records, "../../");
 
-
     std::string TestPath = std::getenv("RTR_PERCEPTION_TEST_DATA_ROOT");
     RTR_INFO(
         "Succesfully accessed environment variable "

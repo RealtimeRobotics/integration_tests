@@ -5,8 +5,8 @@
 #include <nlohmann-json/json.hpp>
 
 #include <rtr_utils/Logging.hpp>
-#include <rtr_utils/ZipUtils.hpp>
 #include <rtr_utils/Strings.hpp>
+#include <rtr_utils/ZipUtils.hpp>
 #include <rtr_utils/time/Timer.hpp>
 
 namespace bfs = boost::filesystem;
@@ -31,10 +31,10 @@ bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
     RTR_WARN("Toolkit project failed to load {}", zip_path);
   }
 
-  auto it = std::find_if( toolkit_projects_.begin(), toolkit_projects_.end(),
-      [&zip_path](const std::pair<std::string, RapidPlanProject::Ptr>& project ){
-        return project.first == zip_path;
-      } );
+  auto it = std::find_if(toolkit_projects_.begin(), toolkit_projects_.end(),
+                         [&zip_path](const std::pair<std::string, RapidPlanProject::Ptr>& project) {
+                           return project.first == zip_path;
+                         });
 
   if (it == toolkit_projects_.end()) {
     toolkit_projects_.push_back(std::make_pair(zip_path, prj));
@@ -74,9 +74,9 @@ bool ApplianceTestHelper::SetupFixture_LoadedProjects() {
   }
 
   for (const auto& prj : toolkit_projects_) {
-    if(ExtCode::SUCCESS !=  app_cmdr_.InitGroup(kDefaultDeconGroupName,
-                                                prj.second->GetName(),
-                                                prj.second->GetStateSpaceNames()[0]) ) {
+    if (ExtCode::SUCCESS
+        != app_cmdr_.InitGroup(kDefaultDeconGroupName, prj.second->GetName(),
+                               prj.second->GetStateSpaceNames()[0])) {
       RTR_ERROR("Failed init group");
       return false;
     }

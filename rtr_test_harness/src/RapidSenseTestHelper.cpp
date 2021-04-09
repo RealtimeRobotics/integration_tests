@@ -3,10 +3,11 @@
 #include <ros/package.h>
 
 #include <rtr_perc_rapidsense_ros/RapidSenseStatus.hpp>
-#include "rtr_perc_rapidsense_ros/Record.hpp"
 #include <rtr_perc_rapidsense_ros/SchemaMessageHelpers.hpp>
 #include <rtr_utils/Logging.hpp>
 #include <rtr_utils/Strings.hpp>
+
+#include "rtr_perc_rapidsense_ros/Record.hpp"
 
 namespace bfs = boost::filesystem;
 namespace rtr {
@@ -27,7 +28,7 @@ bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
     }
   }
 
-  std::string rapidsense_data = project_dir + "/rapidsense_data"; 
+  std::string rapidsense_data = project_dir + "/rapidsense_data";
   if (bfs::exists(rapidsense_data)) {
     RTR_WARN("Rapidsense data exists, copying to active rapidsense dir");
     std::string rapidsense_data_directory =
@@ -59,7 +60,6 @@ bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
   }
   return true;
 }
-
 
 bool RapidSenseTestHelper::GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config) {
   ros::ServiceClient get_config_client =

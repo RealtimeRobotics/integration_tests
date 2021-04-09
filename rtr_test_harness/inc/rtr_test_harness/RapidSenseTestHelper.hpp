@@ -42,7 +42,7 @@ class RapidSenseTestHelper : public ApplianceTestHelper {
   // @brief start the sensor simulator and restart sim
   bool StartSensorSimulator();
 
-private:
+ private:
   SensorSimulator::Ptr simulator_;
   ros::ServiceServer restart_sim_;
 };

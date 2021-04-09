@@ -30,9 +30,7 @@
 
 namespace rtr {
 
-WebappCommander::WebappCommander(ros::NodeHandle& nh)
-    : nh_(nh) {
-}
+WebappCommander::WebappCommander(ros::NodeHandle& nh) : nh_(nh) {}
 
 bool WebappCommander::AcceptEula() {
   rtr_msgs::SetEULAAcceptedGoal goal;
@@ -98,14 +96,14 @@ bool WebappCommander::AddAllProjectsToDeconGroup(const std::string& dc_group_nam
 }
 
 // bool WebappCommander::SetVisionEnabled(const std::string& dc_group_name, bool is_enabled) {
-  // rtr_msgs::SetVisionEnabled srv;
-  // srv.request.group_name = dc_group_name;
-  // srv.request.enabled = is_enabled;
-  // if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
-  //   return false;
-  // }
+// rtr_msgs::SetVisionEnabled srv;
+// srv.request.group_name = dc_group_name;
+// srv.request.enabled = is_enabled;
+// if (!CallRosService<rtr_msgs::SetVisionEnabled>(nh_, srv, "/SetVisionEnabled")) {
+//   return false;
+// }
 
-  // return true;
+// return true;
 // }
 
 bool WebappCommander::LoadGroup(const std::string& dc_group_name) {
@@ -129,7 +127,7 @@ bool WebappCommander::UnloadGroup(const std::string& dc_group_name) {
 }
 
 bool WebappCommander::SetProjectRobotParam(const std::string& prj_name,
-                                               const std::string& param_json_path) {
+                                           const std::string& param_json_path) {
   // take the robot_param json file and create a json obj
   std::ifstream ifs(param_json_path);
   nlohmann::json j = nlohmann::json::parse(ifs);
@@ -173,12 +171,14 @@ bool WebappCommander::ClearApplianceDatabase() {
       rtr_msgs::GroupProjectGoal remove_goal;
       remove_goal.group_name = group.GroupName;
       remove_goal.project_name = project;
-      if (!CallRosActionWithResultCheck<rtr_msgs::GroupProjectAction>("/RemoveProjectFromGroup", remove_goal)) {
+      if (!CallRosActionWithResultCheck<rtr_msgs::GroupProjectAction>("/RemoveProjectFromGroup",
+                                                                      remove_goal)) {
         return false;
       }
       rtr_msgs::DeleteProjectGoal delete_goal;
       delete_goal.project_name = project;
-      if (!CallRosActionWithResultCheck<rtr_msgs::DeleteProjectAction>("/DeleteProject", delete_goal)) {
+      if (!CallRosActionWithResultCheck<rtr_msgs::DeleteProjectAction>("/DeleteProject",
+                                                                       delete_goal)) {
         return false;
       }
     }
@@ -191,8 +191,7 @@ bool WebappCommander::ClearApplianceDatabase() {
   return true;
 }
 
-bool WebappCommander::TeleportToHub(const std::string& robot_name,
-                                        const std::string& hub_name) {
+bool WebappCommander::TeleportToHub(const std::string& robot_name, const std::string& hub_name) {
   ros::ServiceClient hub_config_service =
       nh_.serviceClient<rtr_msgs::GetHubConfig>("/GetHubConfig");
   rtr_msgs::GetHubConfig hub_config_srv;

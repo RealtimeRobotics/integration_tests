@@ -14,8 +14,8 @@ using ExtCodeSeqPair = rtr::ApplianceCommander::ExtCodeSeqPair;
 namespace rtr {
 namespace perception {
 
-  static const std::string kFollowJointPathTopic = "/FollowJointPath";
-  
+static const std::string kFollowJointPathTopic = "/FollowJointPath";
+
 RapidSenseTest::RapidSenseTest()
     : nh_(""), app_commander_("127.0.0.1"), proxy_(RapidSenseFrontEndProxy::MakePtr()) {}
 
@@ -313,7 +313,8 @@ bool RapidSenseTest::MoveToHubs_(std::vector<RapidSenseTestHubConfig>& hub_seque
   }
 
   for (auto it = hub_sequence.begin() + 1; it != hub_sequence.end(); ++it) {
-    pair = app_commander_.MoveToHub(it->active_robot, it->state_space, it->hub_name, config_.speed, 0);
+    pair =
+        app_commander_.MoveToHub(it->active_robot, it->state_space, it->hub_name, config_.speed, 0);
     res = pair.first;
     seq_num = pair.second;
     if (res != ExtCode::SUCCESS) {

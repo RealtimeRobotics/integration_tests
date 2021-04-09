@@ -8,11 +8,11 @@
 #include <ros/ros.h>
 #include <ros/service.h>
 
+#include <rtr_app_layer/RapidPlanProject.hpp>
 #include <rtr_appliance/ApplianceCommander.hpp>
 #include <rtr_msgs/DeconGroupInfo.h>
 #include <rtr_test_harness/WebappCommander.hpp>
 #include <rtr_utils/Logging.hpp>
-#include <rtr_app_layer/RapidPlanProject.hpp>
 
 const std::string kDefaultApplianceIP = "127.0.0.1";
 const std::string kDefaultApplianceDirectory = "/tmp/appliance_data";

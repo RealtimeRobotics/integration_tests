@@ -6,9 +6,10 @@
 #include <ros/ros.h>
 #include <ros/service.h>
 
-#include "rtr_appliance/ApplianceExternalInterfaceCodes.hpp"
 #include <rtr_msgs/DeconGroupInfo.h>
 #include <rtr_utils/Logging.hpp>
+
+#include "rtr_appliance/ApplianceExternalInterfaceCodes.hpp"
 
 const std::string kDefaultEulaSignature = "unittest";
 const std::string kDefaultDeconGroupName = "integration_test_group";
@@ -25,7 +26,8 @@ bool CallRosAction(const std::string& action_name, const GoalType& goal) {
   }
 
   actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
-  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED
+      && state != actionlib::SimpleClientGoalState::ABORTED) {
     RTR_ERROR("Failed to call {}", action_name);
     return false;
   }
@@ -43,7 +45,8 @@ bool CallRosAction(const std::string& action_name, const GoalType& goal, ResultT
   }
 
   actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
-  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED
+      && state != actionlib::SimpleClientGoalState::ABORTED) {
     RTR_ERROR("Failed to call {}", action_name);
     return false;
   }
@@ -62,7 +65,8 @@ bool CallRosActionWithResultCheck(const std::string& action_name, const GoalType
   }
 
   actionlib::SimpleClientGoalState state = client.sendGoalAndWait(goal);
-  if (state != actionlib::SimpleClientGoalState::SUCCEEDED && state != actionlib::SimpleClientGoalState::ABORTED) {
+  if (state != actionlib::SimpleClientGoalState::SUCCEEDED
+      && state != actionlib::SimpleClientGoalState::ABORTED) {
     RTR_ERROR("Failed to call {}", action_name);
     return true;
   }

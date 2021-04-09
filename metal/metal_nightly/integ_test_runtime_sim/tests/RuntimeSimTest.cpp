@@ -153,7 +153,8 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
   EXPECT_FALSE(first_config.FuzzyEquals(curr_config, 0.01));
 
   // move back to start configuration
-  res_pair = appliance_.app_cmdr_.MoveToHub(robot_name_, default_state_space_, start_hub_name_, 0.8f);
+  res_pair =
+      appliance_.app_cmdr_.MoveToHub(robot_name_, default_state_space_, start_hub_name_, 0.8f);
   EXPECT_EQ(res_pair.first, ExtCode::SUCCESS);
   EXPECT_EQ(appliance_.app_cmdr_.WaitForMove(res_pair.second), ExtCode::SUCCESS);
 
@@ -172,7 +173,8 @@ TEST_F(RuntimeSimTest, TestRuntimeMoveToHub) {
     EXPECT_EQ(state_spaces[observer->GetName()],
               observer->GetStateSpaceUUIDFromName(default_state_space_));
   }
-  EXPECT_EQ(appliance_.app_cmdr_.ChangeWorkspace(robot_name_, other_state_space_), ExtCode::SUCCESS);
+  EXPECT_EQ(appliance_.app_cmdr_.ChangeWorkspace(robot_name_, other_state_space_),
+            ExtCode::SUCCESS);
   frame = proxy_.GetFrame("voxel_stream", "", ft, 0.5, 0.5);
   EXPECT_TRUE(frame);
   if (frame) {
