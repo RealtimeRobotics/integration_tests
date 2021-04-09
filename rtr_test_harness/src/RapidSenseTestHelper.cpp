@@ -3,9 +3,12 @@
 #include <ros/package.h>
 
 #include <rtr_perc_rapidsense_ros/RapidSenseStatus.hpp>
+#include "rtr_perc_rapidsense_ros/Record.hpp"
 #include <rtr_perc_rapidsense_ros/SchemaMessageHelpers.hpp>
 #include <rtr_utils/Logging.hpp>
+#include <rtr_utils/Strings.hpp>
 
+namespace bfs = boost::filesystem;
 namespace rtr {
 namespace perception {
 
@@ -16,11 +19,27 @@ RapidSenseTestHelper::~RapidSenseTestHelper() {
 }
 
 bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
-  RapidSenseHealth rs_health;
-  if (!GetRapidSenseServerHealth(rs_health)) {
-    RTR_ERROR("Rapidsense Server failed to response");
-    return false;
+  std::string project_dir = DirName(toolkit_projects_.front().first);
+  for (auto& project : toolkit_projects_) {
+    if (project_dir != DirName(project.first)) {
+      RTR_ERROR("all toolkit projects must be in the same directory");
+      return false;
+    }
   }
+
+  std::string rapidsense_data = project_dir + "/rapidsense_data"; 
+  if (bfs::exists(rapidsense_data)) {
+    RTR_WARN("Rapidsense data exists, copying to active rapidsense dir");
+    std::string rapidsense_data_directory =
+        fmt::format("{}/{}/", kDefaultRapidsenseDirectory, kDefaultDeconGroupName);
+    CopyFolder(rapidsense_data, kDefaultRapidsenseDirectory);
+  }
+
+  // RapidSenseHealth rs_health;
+  // if (!GetRapidSenseServerHealth(rs_health)) {
+  //   RTR_ERROR("Rapidsense Server failed to response");
+  //   return false;
+  // }
 
   if (!SetupFixture_LoadedProjects()) {
     RTR_ERROR("Failed to setup appliance");

@@ -106,16 +106,16 @@ class WebappCommander {
   bool GetInstalledProjects(std::vector<std::string>& projects);
 
   // @brief Create a decon group, and add all installed projects to that group
-  bool AddAllProjectsToDeconGroup(const std::string& dc_group_name);
+  bool AddAllProjectsToDeconGroup(const std::string& dc_group_name = kDefaultDeconGroupName);
 
   // @brief Set appliance deconfliction group to run with rapidsense enabled
-  bool SetVisionEnabled(const std::string& dc_group_name, bool is_enabled);
+  bool SetVisionEnabled(bool is_enabled, const std::string& dc_group_name = kDefaultDeconGroupName);
 
   // @brief Load appliance with deconfliction group as per user-guide
-  bool LoadGroup(const std::string& dc_group_name);
+  bool LoadGroup(const std::string& dc_group_name = kDefaultDeconGroupName);
 
   // @brief Unload deconfliction group from the appliance
-  bool UnloadGroup(const std::string& dc_group_name);
+  bool UnloadGroup(const std::string& dc_group_name = kDefaultDeconGroupName);
 
   /**
    * @brief take a json file and set that as the robot_params for the
@@ -134,6 +134,7 @@ class WebappCommander {
 
  protected:
   ros::NodeHandle nh_;
+  std::string active_decon_group_ = kDefaultDeconGroupName;
 };
 
 }  // namespace rtr

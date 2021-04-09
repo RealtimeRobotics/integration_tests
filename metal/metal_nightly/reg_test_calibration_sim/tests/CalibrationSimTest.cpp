@@ -32,17 +32,9 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("rapidsense_calibration_sim");
 
   ros::init(argc, argv, "CalibrationSimTest");
-  RapidSenseTestHarnessServer server;
-  if (!server.SetUpSim(appliance_dir)) {
-    RTR_ERROR("Failed to setup test server");
-    return EXIT_FAILURE;
-  }
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
 
-  server.Teardown();
-  bfs::remove_all(appliance_dir);
-  bfs::remove_all(rapidsense_dir);
   return res;
 }
 
@@ -56,6 +48,8 @@ class CalibrationTestFixture : public ::testing::Test {
 
   void SetUp() override {
     RTR_INFO("TEST SETUP");
+    appliance_.WaitForApplianceServer();
+
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");
     nh_.param<std::string>("flange_frame", flange_frame, "ur3/flange");
@@ -72,20 +66,20 @@ class CalibrationTestFixture : public ::testing::Test {
     RTR_INFO("Value of project={}", project);
     RTR_INFO("Value of rapidsense_data={}", rapidsense_data);
 
-    std::string rapidsense_state_directory;
-    if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
-      RTR_ERROR("Unable to get state directory from rapidsense");
-    }
+    // std::string rapidsense_state_directory;
+    // if (!proxy_.GetStateDirectory(rapidsense_state_directory)) {
+    //   RTR_ERROR("Unable to get state directory from rapidsense");
+    // }
 
-    std::string rapidsense_data_directory =
-        fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
-    CopyFolder(rapidsense_data, rapidsense_data_directory);
+    // std::string rapidsense_data_directory =
+    //     fmt::format("{}/{}/", rapidsense_state_directory, decon_group_name);
+    // CopyFolder(rapidsense_data, rapidsense_data_directory);
 
     ASSERT_TRUE(appliance_.webapp_cmdr_.ClearApplianceDatabase());
     ASSERT_TRUE(appliance_.webapp_cmdr_.InstallProject(project));
     ASSERT_TRUE(appliance_.webapp_cmdr_.SetProjectRobotParam("ur3", robot_param));
     ASSERT_TRUE(appliance_.webapp_cmdr_.AddAllProjectsToDeconGroup(decon_group_name));
-    ASSERT_TRUE(appliance_.webapp_cmdr_.SetVisionEnabled(decon_group_name, true));
+    // ASSERT_TRUE(appliance_.webapp_cmdr_.SetVisionEnabled(decon_group_name, true));
     ASSERT_TRUE(appliance_.webapp_cmdr_.LoadGroup(decon_group_name));
 
     std_srvs::Trigger trg;

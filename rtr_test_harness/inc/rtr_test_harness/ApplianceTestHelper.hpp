@@ -16,6 +16,7 @@
 
 const std::string kDefaultApplianceIP = "127.0.0.1";
 const std::string kDefaultApplianceDirectory = "/tmp/appliance_data";
+const std::string kDefaultRapidsenseDirectory = "/tmp/rapidsense_data";
 
 namespace rtr {
 
@@ -23,6 +24,7 @@ namespace rtr {
 class ApplianceTestHelper {
  public:
   ApplianceTestHelper(ros::NodeHandle& nh);
+  ~ApplianceTestHelper();
 
   // @brief Add Rapidplan project to be used with test
   bool AddToolkitProject(const std::string& zip_path);
@@ -38,7 +40,7 @@ class ApplianceTestHelper {
 
  protected:
   ros::NodeHandle nh_;
-  std::map<std::string, RapidPlanProject::Ptr> toolkit_projects_;
+  std::vector<std::pair<std::string, RapidPlanProject::Ptr>> toolkit_projects_;
 };
 
 }  // namespace rtr

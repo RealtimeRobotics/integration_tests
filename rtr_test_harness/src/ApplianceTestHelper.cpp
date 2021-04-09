@@ -14,6 +14,12 @@ namespace rtr {
 
 ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
     : app_cmdr_(kDefaultApplianceIP), webapp_cmdr_(nh), nh_(nh) {
+  InitializeLogging("TestHarness", "args_logs_dir", "conf_logs_dir");
+}
+
+ApplianceTestHelper::~ApplianceTestHelper() {
+  bfs::remove_all(kDefaultApplianceDirectory);
+  bfs::remove_all(kDefaultRapidsenseDirectory);
 }
 
 bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
@@ -25,8 +31,13 @@ bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
     RTR_WARN("Toolkit project failed to load {}", zip_path);
   }
 
-  if (toolkit_projects_.find(zip_path) == toolkit_projects_.end()) {
-    toolkit_projects_.emplace(zip_path, prj);
+  auto it = std::find_if( toolkit_projects_.begin(), toolkit_projects_.end(),
+      [&zip_path](const std::pair<std::string, RapidPlanProject::Ptr>& project ){
+        return project.first == zip_path;
+      } );
+
+  if (it == toolkit_projects_.end()) {
+    toolkit_projects_.push_back(std::make_pair(zip_path, prj));
   } else {
     RTR_WARN("Toolkit Project aready exists: {}", zip_path);
     return false;
@@ -82,7 +93,7 @@ bool ApplianceTestHelper::WaitForApplianceServer(const std::string& app_dir) {
     std::this_thread::sleep_for(std::chrono::milliseconds(15));
   }
   if (!bfs::exists(app_dir)) {
-    RTR_ERROR("Timed out waiting for Appliance to create directory structure");
+    RTR_ERROR("Timed out waiting for Appliance to create `ectory structure");
     return false;
   }
   return true;
