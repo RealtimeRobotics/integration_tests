@@ -1,3 +1,0 @@
-<launch>
-  <test test-name="RobotObserverManagerTest" pkg="integ_test_robot_observer" type="RobotObserverManagerTest" time-limit="300" />
-</launch>
