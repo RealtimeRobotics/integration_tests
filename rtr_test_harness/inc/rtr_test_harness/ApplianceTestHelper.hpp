@@ -15,6 +15,7 @@
 #include <rtr_app_layer/RapidPlanProject.hpp>
 
 const std::string kDefaultApplianceIP = "127.0.0.1";
+const std::string kDefaultApplianceDirectory = "/tmp/appliance_data";
 
 namespace rtr {
 
@@ -27,7 +28,10 @@ class ApplianceTestHelper {
   bool AddToolkitProject(const std::string& zip_path);
 
   // @brief Add Rapidplan project to be used with test
-  bool SetupDefault();
+  bool SetupFixture_LoadedProjects();
+
+  // @brief Wait for Appliance Server to start up
+  bool WaitForApplianceServer(const std::string& app_dir = kDefaultApplianceDirectory);
 
   ApplianceCommander app_cmdr_;
   WebappCommander webapp_cmdr_;

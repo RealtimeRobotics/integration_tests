@@ -9,6 +9,7 @@
 
 #include <rtr_msgs/GetSchemaMessage.h>
 #include <rtr_perc_rapidsense_ros/RapidSenseServer.hpp>
+#include <rtr_perc_rapidsense_ros/SensorSimulator.hpp>
 
 #include "rtr_test_harness/ApplianceTestHelper.hpp"
 #include "rtr_test_harness/RapidSenseTestConfigs.hpp"
@@ -19,6 +20,9 @@ namespace perception {
 class RapidSenseTestHelper : public ApplianceTestHelper {
  public:
   RapidSenseTestHelper(ros::NodeHandle& nh);
+  ~RapidSenseTestHelper();
+
+  bool SetupFixture_SimulatedSensors();
 
   // @brief Get rapidsense server config via ros
   bool GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config);
@@ -34,6 +38,13 @@ class RapidSenseTestHelper : public ApplianceTestHelper {
 
   // @brief Check rapidsense server health state matches
   bool CheckRapidSenseServerState(RapidSenseState& state);
+
+  // @brief start the sensor simulator and restart sim
+  bool StartSensorSimulator();
+
+private:
+  SensorSimulator::Ptr simulator_;
+  ros::ServiceServer restart_sim_;
 };
 
 }  // namespace perception

@@ -11,6 +11,37 @@ namespace perception {
 
 RapidSenseTestHelper::RapidSenseTestHelper(ros::NodeHandle& nh) : ApplianceTestHelper{nh} {}
 
+RapidSenseTestHelper::~RapidSenseTestHelper() {
+  simulator_->Shutdown();
+}
+
+bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
+  RapidSenseHealth rs_health;
+  if (!GetRapidSenseServerHealth(rs_health)) {
+    RTR_ERROR("Rapidsense Server failed to response");
+    return false;
+  }
+
+  if (!SetupFixture_LoadedProjects()) {
+    RTR_ERROR("Failed to setup appliance");
+    return false;
+  }
+
+  if (!StartSensorSimulator()) {
+    RTR_ERROR("Failed to start sensor simulator");
+    return false;
+  }
+
+  RapidSenseState cur_state;
+  CheckRapidSenseServerState(cur_state);
+  if (RapidSenseState::CONFIGURE != cur_state) {
+    RTR_ERROR("Rapidsense server is not in configure mode");
+    return false;
+  }
+  return true;
+}
+
+
 bool RapidSenseTestHelper::GetRapidSenseServerConfig(SpatialPerceptionProjectSchema& config) {
   ros::ServiceClient get_config_client =
       nh_.serviceClient<rtr_msgs::GetSchemaMessage>(RS::Topic("get_configuration"));
@@ -83,6 +114,18 @@ bool RapidSenseTestHelper::CheckRapidSenseServerState(RapidSenseState& state) {
   }
 
   return health_.current_status.state == state;
+}
+
+bool RapidSenseTestHelper::StartSensorSimulator() {
+  simulator_ = SensorSimulator::MakePtr(nh_);
+  boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)> callback =
+      [this](std_srvs::Trigger::Request&, std_srvs::Trigger::Response& res) -> bool {
+    this->simulator_->Shutdown();
+    res.success = this->simulator_->Init(true);
+    return true;
+  };
+  restart_sim_ = nh_.advertiseService("/restart_sim", callback);
+  return true;
 }
 
 }  // namespace perception

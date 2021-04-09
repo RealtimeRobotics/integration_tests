@@ -7,7 +7,9 @@
 #include <rtr_utils/Logging.hpp>
 #include <rtr_utils/ZipUtils.hpp>
 #include <rtr_utils/Strings.hpp>
+#include <rtr_utils/time/Timer.hpp>
 
+namespace bfs = boost::filesystem;
 namespace rtr {
 
 ApplianceTestHelper::ApplianceTestHelper(ros::NodeHandle& nh)
@@ -32,7 +34,11 @@ bool ApplianceTestHelper::AddToolkitProject(const std::string& zip_path) {
   return true;
 }
 
-bool ApplianceTestHelper::SetupDefault() {
+bool ApplianceTestHelper::SetupFixture_LoadedProjects() {
+  // Wait for appliance to start up before setting up
+  WaitForApplianceServer();
+
+  // Install all added projects to the appliance
   for (const auto& prj : toolkit_projects_) {
     if (!webapp_cmdr_.InstallProject(prj.first)) {
       RTR_ERROR("Failed to install project {}", prj.first);
@@ -63,6 +69,21 @@ bool ApplianceTestHelper::SetupDefault() {
       RTR_ERROR("Failed init group");
       return false;
     }
+  }
+  return true;
+}
+
+bool ApplianceTestHelper::WaitForApplianceServer(const std::string& app_dir) {
+  boost::system::error_code ec;
+
+  // wait for appliance to create directory structure
+  rtr::Timer timer(true);
+  while (timer.Elapsed() < 30.0 && (!bfs::exists(app_dir, ec) || ec != nullptr)) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(15));
+  }
+  if (!bfs::exists(app_dir)) {
+    RTR_ERROR("Timed out waiting for Appliance to create directory structure");
+    return false;
   }
   return true;
 }
