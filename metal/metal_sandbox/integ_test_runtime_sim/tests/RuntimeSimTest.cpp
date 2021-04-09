@@ -17,7 +17,6 @@
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/Record.hpp>
 #include <rtr_perc_sensors/SensorCalibrationData.hpp>
-#include <rtr_test_harness/RapidSenseTestHarnessServer.hpp>
 #include <rtr_test_harness/RapidSenseTestHelper.hpp>
 #include <rtr_utils/Logging.hpp>
 
@@ -33,13 +32,7 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("rapidsense_runtime_sim");
 
   ros::init(argc, argv, "RuntimeSimTest");
-  RapidSenseTestHarnessServer server;
-
   ::testing::InitGoogleTest(&argc, argv);
-  if (!server.SetUpSim(appliance_dir)) {
-    RTR_ERROR("Failed to setup test server");
-    return EXIT_FAILURE;
-  }
   int res = RUN_ALL_TESTS();
 
   server.Teardown();
@@ -58,6 +51,10 @@ class RuntimeSimTest : public ::testing::Test {
   std::string start_hub_name_, target_hub_name_;
 
   void SetUp() override {
+    appliance_.WaitForApplianceServer();
+    appliance_.StartSensorSimulator();
+    appliance_.CheckRapidSenseServerState(RapidSenseState::IDLE);
+
     // get test parameters
     nh_.param<std::string>("decon_group_name", decon_group_name_, "ur3_runtime_test");
     nh_.param<std::string>("robot_name", robot_name_, "ur3");

@@ -37,7 +37,7 @@ class RapidSenseTestHelper : public ApplianceTestHelper {
   bool GetRapidSenseServerHealth(RapidSenseHealth& health);
 
   // @brief Check rapidsense server health state matches
-  bool CheckRapidSenseServerState(RapidSenseState& state);
+  bool CheckRapidSenseServerState(RapidSenseState state);
 
   // @brief start the sensor simulator and restart sim
   bool StartSensorSimulator();

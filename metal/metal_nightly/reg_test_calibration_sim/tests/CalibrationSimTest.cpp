@@ -17,7 +17,6 @@
 #include "rtr_appliance/Appliance.hpp"
 #include "rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp"
 #include "rtr_perc_rapidsense_ros/Record.hpp"
-#include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
 #include "rtr_test_harness/RapidSenseTestHelper.hpp"
 
 using namespace rtr::perception;
@@ -49,6 +48,8 @@ class CalibrationTestFixture : public ::testing::Test {
   void SetUp() override {
     RTR_INFO("TEST SETUP");
     appliance_.WaitForApplianceServer();
+    appliance_.StartSensorSimulator();
+    appliance_.CheckRapidSenseServerState(RapidSenseState::IDLE);
 
     nh_.param<std::string>("decon_group_name", decon_group_name, "ur3_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "ur3");

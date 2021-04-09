@@ -12,7 +12,6 @@
 #include <rtr_appliance/Appliance.hpp>
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/Record.hpp>
-#include <rtr_test_harness/RapidSenseTestHarnessServer.hpp>
 #include <rtr_test_harness/RapidSenseTestHelper.hpp>
 #include <rtr_utils/Logging.hpp>
 
@@ -28,12 +27,6 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("robotproxy_controller");
 
   ros::init(argc, argv, "RosRobotProxyControllerTest");
-  RapidSenseTestHarnessServer server;
-  if (!server.SetUpSim(appliance_dir)) {
-    RTR_ERROR("Failed to setup test server");
-    return EXIT_FAILURE;
-  }
-
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
 
@@ -55,6 +48,10 @@ class RosRobotProxyControllerTest : public ::testing::Test {
   std::string start_hub_name_, target_hub_name_;
 
   void SetUp() override {
+    appliance_.WaitForApplianceServer();
+    appliance_.StartSensorSimulator();
+    appliance_.CheckRapidSenseServerState(RapidSenseState::IDLE);
+
     // get test parameters
     nh_.param<std::string>("decon_group_name", decon_group_name_, "ur3_proxycontroller_test");
     nh_.param<std::string>("robot_name", robot_name_, "ur3");

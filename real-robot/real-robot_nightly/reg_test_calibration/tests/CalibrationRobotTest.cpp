@@ -17,7 +17,6 @@
 #include "rtr_appliance/Appliance.hpp"
 #include "rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp"
 #include "rtr_perc_rapidsense_ros/Record.hpp"
-#include "rtr_test_harness/RapidSenseTestHarnessServer.hpp"
 #include "rtr_test_harness/RapidSenseTestHelper.hpp"
 
 using namespace rtr::perception;
@@ -32,12 +31,6 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("rapidsense_calibration");
 
   ros::init(argc, argv, "CalibrationTest");
-  RapidSenseTestHarnessServer server;
-  if (!server.SetUp(appliance_dir)) {
-    RTR_ERROR("Failed to setup test server");
-    return EXIT_FAILURE;
-  }
-
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
 
@@ -58,6 +51,10 @@ class CalibrationTestFixture : public ::testing::Test {
       robot_param;
 
   void SetUp() override {
+    appliance_.WaitForApplianceServer();
+    appliance_.StartSensorSimulator();
+    appliance_.CheckRapidSenseServerState(RapidSenseState::IDLE);
+
     nh_.param<std::string>("decon_group_name", decon_group_name, "alphabot_calibration_test");
     nh_.param<std::string>("robot_name", robot_name, "alphabot");
     nh_.param<std::string>("flange_frame", flange_frame, "alphabot_rtr_flange");

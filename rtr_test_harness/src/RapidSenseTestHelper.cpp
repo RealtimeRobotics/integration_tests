@@ -36,12 +36,6 @@ bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
     CopyFolder(rapidsense_data, kDefaultRapidsenseDirectory);
   }
 
-  // RapidSenseHealth rs_health;
-  // if (!GetRapidSenseServerHealth(rs_health)) {
-  //   RTR_ERROR("Rapidsense Server failed to response");
-  //   return false;
-  // }
-
   if (!SetupFixture_LoadedProjects()) {
     RTR_ERROR("Failed to setup appliance");
     return false;
@@ -52,9 +46,7 @@ bool RapidSenseTestHelper::SetupFixture_SimulatedSensors() {
     return false;
   }
 
-  RapidSenseState cur_state;
-  CheckRapidSenseServerState(cur_state);
-  if (RapidSenseState::CONFIGURE != cur_state) {
+  if (CheckRapidSenseServerState(RapidSenseState::CONFIGURE)) {
     RTR_ERROR("Rapidsense server is not in configure mode");
     return false;
   }
@@ -126,7 +118,7 @@ bool RapidSenseTestHelper::GetRapidSenseServerHealth(RapidSenseHealth& health) {
   return true;
 }
 
-bool RapidSenseTestHelper::CheckRapidSenseServerState(RapidSenseState& state) {
+bool RapidSenseTestHelper::CheckRapidSenseServerState(RapidSenseState state) {
   RapidSenseHealth health_;
   if (!this->GetRapidSenseServerHealth(health_)) {
     return false;

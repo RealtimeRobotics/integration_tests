@@ -13,7 +13,6 @@
 #include <rtr_perc_rapidsense_ros/RapidSenseFrontEndProxy.hpp>
 #include <rtr_perc_rapidsense_ros/Record.hpp>
 #include <rtr_perc_rapidsense_ros/RobotObserverManager.hpp>
-#include <rtr_test_harness/RapidSenseTestHarnessServer.hpp>
 #include <rtr_test_harness/RapidSenseTestHelper.hpp>
 #include <rtr_utils/Logging.hpp>
 
@@ -31,11 +30,6 @@ int main(int argc, char** argv) {
   QCoreApplication::setApplicationName("robot_observer_manager");
 
   ros::init(argc, argv, "RobotObserverManagerTest");
-  RapidSenseTestHarnessServer server;
-  if (!server.SetUpSim(appliance_dir)) {
-    RTR_ERROR("Failed to setup test server");
-    return EXIT_FAILURE;
-  }
 
   ::testing::InitGoogleTest(&argc, argv);
   int res = RUN_ALL_TESTS();
@@ -59,8 +53,11 @@ class RobotObserverManagerTestFixture : public ::testing::Test {
   const std::vector<std::string> project_names_{"otto", "reggie"};
 
   void SetUp() override {
-    // get test parameters
+    appliance_.WaitForApplianceServer();
+    appliance_.StartSensorSimulator();
+    appliance_.CheckRapidSenseServerState(RapidSenseState::IDLE);
 
+    // get test parameters
     std::string rapidsense_data;
     const std::string package_path =
         ros::package::getPath("integ_test_robot_observer") + "/../../test_data/rocket_power/";
