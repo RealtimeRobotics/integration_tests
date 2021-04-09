@@ -1,0 +1,3 @@
+<launch>
+  <test test-name="RosRobotObserverTest" pkg="integ_test_robot_observer" type="RosRobotObserverTest" time-limit="300" />
+</launch>
